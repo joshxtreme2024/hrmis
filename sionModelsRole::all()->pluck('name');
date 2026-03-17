@@ -1,0 +1,27 @@
+[90m= [39m[34;4mIlluminate\Support\Collection[39;24m {#5454
+    [34mall[39m: [
+      "[32mview-employees[39m",
+      "[32mcreate-employees[39m",
+      "[32medit-employees[39m",
+      "[32mdelete-employees[39m",
+      "[32mview-attendance[39m",
+      "[32mcreate-attendance[39m",
+      "[32medit-attendance[39m",
+      "[32mdelete-attendance[39m",
+      "[32mview-leave[39m",
+      "[32mcreate-leave[39m",
+      "[32mapprove-leave[39m",
+      "[32mdelete-leave[39m",
+      "[32mview-payroll[39m",
+      "[32mcreate-payroll[39m",
+      "[32medit-payroll[39m",
+      "[32mdelete-payroll[39m",
+      "[32mview-reports[39m",
+      "[32mgenerate-reports[39m",
+      "[32mexport-reports[39m",
+      "[32mmanage-settings[39m",
+      "[32mmanage-users[39m",
+      "[32mmanage-roles[39m",
+    ],
+  }
+

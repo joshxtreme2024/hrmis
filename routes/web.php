@@ -24,6 +24,30 @@ Route::middleware('auth')->group(function () {
     Route::get('/documents/my-documents', [SettingsController::class, 'index'])->name('documents.my-documents');
 
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+
+    Route::get('/employees', [SettingsController::class, 'index'])->name('employees.index');
+    Route::get('/departments', [SettingsController::class, 'index'])->name('departments.index');
+    Route::get('/positions', [SettingsController::class, 'index'])->name('positions.index');
+    Route::get('/employment-types', [SettingsController::class, 'index'])->name('employment-types.index');
+    
+    Route::get('/attendance/daily', [SettingsController::class, 'index'])->name('attendance.daily');
+    Route::get('/attendance/timesheets', [SettingsController::class, 'index'])->name('attendance.timesheets');
+    Route::get('/attendance/overtime', [SettingsController::class, 'index'])->name('overtime.index');
+    Route::get('/shifts', [SettingsController::class, 'index'])->name('shifts.index');
+
+    Route::get('/leave/requests', [SettingsController::class, 'index'])->name('leave.requests');
+    Route::get('/leave/calendar', [SettingsController::class, 'index'])->name('leave.calendar');
+    Route::get('/leave/types', [SettingsController::class, 'index'])->name('leave.types');
+    Route::get('/leave/my-requests', [SettingsController::class, 'index'])->name('leave.my-requests');
+
+    Route::get('/payroll/salaries', [SettingsController::class, 'index'])->name('payroll.salaries');
+    Route::get('/payroll/payslips', [SettingsController::class, 'index'])->name('payroll.payslips');
+    Route::get('/payroll/tax', [SettingsController::class, 'index'])->name('payroll.tax');
+    Route::get('/payroll/benefits', [SettingsController::class, 'index'])->name('payroll.benefits');
+
+    Route::get('/payroll/benefits', [SettingsController::class, 'index'])->name('reports.index');
+    Route::get('/settings/users', [SettingsController::class, 'index'])->name('settings.users');
+    Route::get('/settings/roles', [SettingsController::class, 'index'])->name('settings.roles');
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {
