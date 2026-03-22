@@ -94,9 +94,10 @@
                     <br>
                     <span class="text-gray-700 dark:text-gray-300">Information System</span>
                 </h1>
-                <p class="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                    Streamline your HR processes with our comprehensive management solution for 
-                    <span class="font-semibold text-blue-600 dark:text-blue-400">Aguinaldo, Ifugao</span>
+                <p>
+                    <span class="text-blue-700 text-lg font-semibold dark:text-blue-100">Aguinaldo, Ifugao, Philippines</span></p>
+                <p class="text-sm text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+                    Streamline HR processes with  comprehensive management solution.
                 </p>
             </div>
 
@@ -130,7 +131,7 @@
             </div>
 
             <!-- CTA Buttons -->
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <!-- <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <a href="{{ route('login') }}" 
                    class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200">
                     <i class="bi bi-box-arrow-in-right mr-2"></i>
@@ -139,9 +140,9 @@
                 <a href="#features" 
                    class="inline-flex items-center px-6 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:border-blue-500 text-gray-700 dark:text-gray-300 font-semibold rounded-xl shadow-md hover:shadow-lg transition-all duration-200">
                     <i class="bi bi-info-circle mr-2"></i>
-                    Learn More
+                    Register
                 </a>
-            </div>
+            </div> -->
         </div>
     </main>
 

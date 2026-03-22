@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use App\Models\PersonalDataSheets;
 
 class RegisteredUserController extends Controller
 {
@@ -31,15 +32,32 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'first_name' => ['required', 'string', 'max:255'],
+            'last_name' => ['required', 'string', 'max:255'],
+            'middle_name' => ['nullable', 'string', 'max:255'],
+            'name_extension' => ['nullable', 'string', 'max:50'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        
+        $fullName = trim($request->first_name . ' ' . $request->middle_name . ' ' . $request->last_name . ' ' . $request->name_extension);
+        
+        $fullName = preg_replace('/\s+/', ' ', $fullName);
+
         $user = User::create([
-            'name' => $request->name,
+            'name' => strtoupper($fullName),
             'email' => $request->email,
             'password' => Hash::make($request->password),
+        ]);
+
+        PersonalDataSheets::create([
+            'user_id' => $user->id,
+            'first_name' => strtoupper($request->first_name),
+            'last_name' => strtoupper($request->last_name),
+            'middle_name' => strtoupper($request->middle_name),
+            'name_extension' => strtoupper($request->name_extension),
+            'email_address' => $request->email,
         ]);
 
         event(new Registered($user));

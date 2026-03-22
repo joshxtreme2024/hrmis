@@ -30,7 +30,7 @@
         </div>
 
         <div class="py-1">
-            <a href="{{ route('profile.show') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+            <a href="{{ route('myprofile.show') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                 <i class="bi bi-person w-5 text-gray-400"></i>
                 <span class="ml-3">My Profile</span>
             </a>

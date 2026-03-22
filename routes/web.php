@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\MyProfileController;
+use App\Http\Controllers\SettingsController;
+use App\Http\Controllers\PositionsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -12,22 +15,23 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::get('/profile/update', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
-    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+
+    Route::get('/my-profile', [MyProfileController::class, 'show'])->name('myprofile.show');
+    Route::get('/my-profile/edit/{userId?}', [MyProfileController::class, 'edit'])->name('myprofile.edit');
+
     Route::get('/attendance/my-timesheet', [SettingsController::class, 'index'])->name('attendance.my-timesheet');
     Route::get('/leave/my-requests', [SettingsController::class, 'index'])->name('leave.my-requests');
     Route::get('/payroll/my-payslips', [SettingsController::class, 'index'])->name('payroll.my-payslips');
     Route::get('/documents/my-documents', [SettingsController::class, 'index'])->name('documents.my-documents');
 
-    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
-
     Route::get('/employees', [SettingsController::class, 'index'])->name('employees.index');
     Route::get('/departments', [SettingsController::class, 'index'])->name('departments.index');
-    Route::get('/positions', [SettingsController::class, 'index'])->name('positions.index');
+
     Route::get('/employment-types', [SettingsController::class, 'index'])->name('employment-types.index');
     
     Route::get('/attendance/daily', [SettingsController::class, 'index'])->name('attendance.daily');
@@ -46,12 +50,23 @@ Route::middleware('auth')->group(function () {
     Route::get('/payroll/benefits', [SettingsController::class, 'index'])->name('payroll.benefits');
 
     Route::get('/payroll/benefits', [SettingsController::class, 'index'])->name('reports.index');
-    Route::get('/settings/users', [SettingsController::class, 'index'])->name('settings.users');
-    Route::get('/settings/roles', [SettingsController::class, 'index'])->name('settings.roles');
+
+    
 });
 
-Route::middleware(['auth', 'admin'])->group(function () {
+Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
+    Route::get('/settings/users', [SettingsController::class, 'users'])->name('settings.users');
+    Route::get('/settings/roles', [SettingsController::class, 'roles'])->name('settings.roles');
+
+    Route::get('/settings/positions', [PositionsController::class, 'index'])->name('positions.index');
+    Route::get('/settings/positions/show', [PositionsController::class, 'index'])->name('positions.show');
+    Route::get('/settings/positions/create', [PositionsController::class, 'create'])->name('positions.create');
+    Route::get('/settings/positions/edit/{position}', [PositionsController::class, 'create'])->name('positions.edit');
+    Route::post('/settings/positions/create', [PositionsController::class, 'store'])->name('positions.store');
+    Route::post('/settings/positions/delete/{position}', [PositionsController::class, 'store'])->name('positions.destroy');
+
+    Route::get('/settings/system', [SettingsController::class, 'system'])->name('settings.system');
 });
 
 require __DIR__.'/auth.php';

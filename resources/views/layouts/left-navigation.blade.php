@@ -121,7 +121,8 @@ $menuItems = [
         'color' => 'from-gray-500 to-gray-600',
         'submenu' => [
             ['title' => 'Company Settings', 'route' => 'settings.company', 'icon' => 'bi-building-gear', 'permission' => 'manage-company-settings'],
-            ['title' => 'User Management', 'route' => 'settings.users', 'icon' => 'bi-people-gear', 'permission' => 'manage-users'],
+            ['title' => 'User Management', 'route' => 'settings.users', 'icon' => 'bi-person-gear', 'permission' => 'manage-users'],
+            ['title' => 'Office Positions', 'route' => 'positions.index', 'icon' => 'bi-house-gear', 'permission' => 'manage-positions'],
             ['title' => 'Roles & Permissions', 'route' => 'settings.roles', 'icon' => 'bi-shield', 'permission' => 'manage-roles'],
             ['title' => 'System Settings', 'route' => 'settings.system', 'icon' => 'bi-sliders2', 'permission' => 'manage-system'],
             ['title' => 'Email Templates', 'route' => 'settings.emails', 'icon' => 'bi-envelope-paper', 'permission' => 'manage-emails'],
@@ -195,7 +196,7 @@ foreach($menuItems as $item) {
                     <i class="bi bi-three-dots-vertical"></i>
                 </button>
                 <div x-show="open" @click.away="open = false" class="absolute bottom-full right-0 mb-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 py-1 z-50">
-                    <a href="{{ route('profile.show') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+                    <a href="{{ route('myprofile.show') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                         <i class="bi bi-person me-2"></i> Profile
                     </a>
                     <a href="{{ route('profile.edit') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
@@ -304,7 +305,7 @@ foreach($menuItems as $item) {
                     <i class="bi bi-speedometer2 text-lg text-gray-400"></i>
                     <span class="ml-3">Dashboard</span>
                 </a>
-                <a href="{{ route('profile.show') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50">
+                <a href="{{ route('myprofile.show') }}" class="flex items-center px-3 py-2.5 text-sm font-medium rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50">
                     <i class="bi bi-person text-lg text-gray-400"></i>
                     <span class="ml-3">Profile</span>
                 </a>
