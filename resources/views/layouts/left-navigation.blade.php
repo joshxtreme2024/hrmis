@@ -29,7 +29,7 @@ $menuItems = [
         ]
     ],
     [
-        'title' => 'Time & Attendance',
+        'title' => 'Attendance',
         'icon' => 'bi-clock-history',
         'permission' => 'view-attendance',
         'badge' => '3 pending',
@@ -42,7 +42,7 @@ $menuItems = [
         ]
     ],
     [
-        'title' => 'Leave Management',
+        'title' => 'Leave Mngt.',
         'icon' => 'bi-calendar-check',
         'permission' => 'view-leave',
         'badge' => '8 requests',
@@ -120,12 +120,11 @@ $menuItems = [
         'badge' => null,
         'color' => 'from-gray-500 to-gray-600',
         'submenu' => [
-            ['title' => 'Company Settings', 'route' => 'settings.company', 'icon' => 'bi-building-gear', 'permission' => 'manage-company-settings'],
             ['title' => 'User Management', 'route' => 'settings.users', 'icon' => 'bi-person-gear', 'permission' => 'manage-users'],
+            ['title' => 'Manage Departments', 'route' => 'departments.index', 'icon' => 'bi-building-gear', 'permission' => 'manage-departments'],
             ['title' => 'Office Positions', 'route' => 'positions.index', 'icon' => 'bi-house-gear', 'permission' => 'manage-positions'],
-            ['title' => 'Roles & Permissions', 'route' => 'settings.roles', 'icon' => 'bi-shield', 'permission' => 'manage-roles'],
+            ['title' => 'Roles & Permissions', 'route' => 'roles.index', 'icon' => 'bi-shield', 'permission' => 'manage-roles'],
             ['title' => 'System Settings', 'route' => 'settings.system', 'icon' => 'bi-sliders2', 'permission' => 'manage-system'],
-            ['title' => 'Email Templates', 'route' => 'settings.emails', 'icon' => 'bi-envelope-paper', 'permission' => 'manage-emails'],
         ]
     ],
 ];
@@ -166,29 +165,29 @@ foreach($menuItems as $item) {
     </div>
 
     <!-- Search Box with Icon -->
-    <div class="p-4 border-b border-gray-200/80 dark:border-gray-700/80">
+    <!-- <div class="p-4 border-b border-gray-200/80 dark:border-gray-700/80">
         <div class="relative group">
             <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-blue-500 transition-colors"></i>
             <input type="text" 
                    placeholder="Quick search..." 
                    class="w-full pl-10 pr-4 py-2.5 text-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-700 dark:text-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
         </div>
-    </div>
+    </div> -->
 
     <!-- User Quick Info -->
     <div class="px-4 py-3 border-b border-gray-200/80 dark:border-gray-700/80 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800">
         <div class="flex items-center space-x-3">
             <div class="relative">
                 <img class="h-10 w-10 rounded-xl object-cover border-2 border-white dark:border-gray-700 shadow-md" 
-                     src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&background=2563eb&color=fff&bold=true&size=128' }}" 
-                     alt="{{ Auth::user()->name }}">
+                     src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?email='.urlencode(Auth::user()->email).'&background=2563eb&color=fff&bold=true&size=128' }}" 
+                     alt="{{ Auth::user()->email }}">
                 <span class="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-white dark:ring-gray-800"></span>
             </div>
             <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ Auth::user()->name }}</p>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ Auth::user()->email }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center">
                     <i class="bi bi-briefcase me-1"></i>
-                    {{ Auth::user()->personalDataSheet->employee_id ?? 'Administrator' }}
+                    {{ Auth::user()->personalDataSheet->first_name ?? 'Administrator' }}
                 </p>
             </div>
             <div class="relative" x-data="{ open: false }">
@@ -344,12 +343,12 @@ foreach($menuItems as $item) {
     </div>
 
     <!-- Mobile Search -->
-    <div class="p-4 border-b border-gray-200/80 dark:border-gray-700/80">
+    <!-- <div class="p-4 border-b border-gray-200/80 dark:border-gray-700/80">
         <div class="relative">
             <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
             <input type="text" placeholder="Search..." class="w-full pl-10 pr-4 py-2.5 text-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
         </div>
-    </div>
+    </div> -->
 
     <!-- Mobile Navigation -->
     <nav class="px-3 py-4 space-y-1">
@@ -411,10 +410,10 @@ foreach($menuItems as $item) {
     <div class="absolute bottom-0 left-0 right-0 border-t border-gray-200/80 dark:border-gray-700/80 p-4 bg-gradient-to-t from-gray-50 to-transparent dark:from-gray-900">
         <div class="flex items-center space-x-3">
             <img class="h-10 w-10 rounded-xl object-cover border-2 border-white dark:border-gray-700" 
-                 src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&background=2563eb&color=fff' }}" 
+                 src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?email='.urlencode(Auth::user()->email).'&background=2563eb&color=fff' }}" 
                  alt="">
             <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ Auth::user()->name }}</p>
+                <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ Auth::user()->email }}</p>
                 <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ Auth::user()->email }}</p>
             </div>
         </div>

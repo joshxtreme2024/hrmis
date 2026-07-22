@@ -20,11 +20,16 @@
          class="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-800 rounded-lg shadow-lg ring-1 ring-black ring-opacity-5 divide-y divide-gray-100 dark:divide-gray-700 focus:outline-none z-50">
 
         <div class="px-4 py-3">
-            <!-- <p class="text-sm font-medium text-gray-900 dark:text-white">{{ Auth::user()->name }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ Auth::user()->email }}</p> -->
+            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ Auth::user()->email }}</p>
             <div class="mt-2 flex items-center">
-                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                    Role: {{ Auth::user()->role ?? 'Employee' }}
+                <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-green-200">
+                    @if(Auth::user()->role === 'admin')
+                        <i class="bi bi-shield-lock-fill me-1 text-gray-400"></i> Administrator
+                    @elseif(Auth::user()->role === 'hr_manager')
+                        <i class="bi bi-shield-check me-1 text-gray-400"></i> HR Manager
+                    @else   
+                        <i class="bi bi-briefcase me-1 text-gray-400"></i> Employee
+                    @endif
                 </span>
             </div>
         </div>

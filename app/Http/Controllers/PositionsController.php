@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Positions;
 use App\Models\Departments;
+use App\Models\JobLevels;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -22,11 +23,12 @@ class PositionsController extends Controller
      * Show the form for creating a new position.
      */
     public function create()
-    {
+    {   
+        $joblevels = JobLevels::orderBy('sort_order')->get();
         $departments = Departments::orderBy('name')->get();
         $positions = Positions::orderBy('title')->get(); // For reports_to dropdown
         
-        return view('positions.create', compact('departments', 'positions'));
+        return view('positions.create', compact('departments', 'positions', 'joblevels'));
     }
 
     /**
@@ -38,11 +40,11 @@ class PositionsController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255|unique:positions,title',
             'department_id' => 'required|exists:departments,id',
-            'level' => 'required|string|max:50',
+            'job_level_id' => 'required|string|max:50',
             'description' => 'nullable|string',
-            'status' => 'required|in:active,inactive',
+            'status' => 'required|in:enabled,disabled',
             'salary_grade' => 'nullable|string|max:50',
-            'reports_to_id' => 'nullable|exists:positions,id',
+            'reports_to_id' => 'nullable|min:1',
         ]);
 
         if ($validator->fails()) {
@@ -55,13 +57,11 @@ class PositionsController extends Controller
         $position = Positions::create([
             'title' => $request->title,
             'department_id' => $request->department_id,
-            'level' => $request->level,
+            'job_level_id' => $request->job_level_id,
             'description' => $request->description,
             'status' => $request->status,
             'salary_grade' => $request->salary_grade,
             'reports_to_id' => $request->reports_to_id,
-            'created_at' => now(),
-            'updated_at' => now(),
         ]);
 
         // Redirect with success message
@@ -84,12 +84,13 @@ class PositionsController extends Controller
      */
     public function edit(Positions $position)
     {
+        $joblevels = JobLevels::orderBy('sort_order')->get();
         $departments = Departments::orderBy('name')->get();
         $positions = Positions::where('id', '!=', $position->id)
                             ->orderBy('title')
-                            ->get(); // Exclude current position from reports_to dropdown
+                            ->get();
         
-        return view('positions.edit', compact('position', 'departments', 'positions'));
+        return view('positions.edit', compact('position', 'departments', 'positions', 'joblevels'));
     }
 
     /**
@@ -101,11 +102,11 @@ class PositionsController extends Controller
         $validator = Validator::make($request->all(), [
             'title' => 'required|string|max:255|unique:positions,title,' . $position->id,
             'department_id' => 'required|exists:departments,id',
-            'level' => 'required|string|max:50',
+            'job_level_id' => 'required|exists:job_levels,id',
             'description' => 'nullable|string',
-            'status' => 'required|in:active,inactive',
+            'status' => 'required|in:enabled,disabled',
             'salary_grade' => 'nullable|string|max:50',
-            'reports_to_id' => 'nullable|exists:positions,id',
+            'reports_to_id' => 'nullable|exists:positions,id|not_in:' . $position->id,
         ]);
 
         if ($validator->fails()) {
@@ -118,12 +119,11 @@ class PositionsController extends Controller
         $position->update([
             'title' => $request->title,
             'department_id' => $request->department_id,
-            'level' => $request->level,
+            'job_level_id' => $request->job_level_id,
             'description' => $request->description,
             'status' => $request->status,
             'salary_grade' => $request->salary_grade,
             'reports_to_id' => $request->reports_to_id,
-            'updated_at' => now(),
         ]);
 
         // Redirect with success message
@@ -134,20 +134,33 @@ class PositionsController extends Controller
     /**
      * Remove the specified position from storage.
      */
-    public function destroy(Positions $position)
+    public function disable(Positions $position)
     {
         // Check if there are any positions reporting to this one
         $hasSubordinates = Positions::where('reports_to_id', $position->id)->exists();
         
         if ($hasSubordinates) {
             return redirect()->route('positions.index')
-                            ->with('error', 'Cannot delete this position because other positions report to it.');
+                            ->with('error', 'Cannot disable this position because other positions report to it.');
         }
 
         $title = $position->title;
-        $position->delete();
+        $position->update([
+            'status' => 'disabled',
+        ]);
 
         return redirect()->route('positions.index')
-                        ->with('success', 'Position "' . $title . '" deleted successfully.');
+                        ->with('success', 'Position "' . $title . '" disabled successfully.');
+    }
+
+    public function enable(Positions $position)
+    {
+        $title = $position->title;
+        $position->update([
+            'status' => 'enabled',
+        ]);
+
+        return redirect()->route('positions.index')
+                        ->with('success', 'Position "' . $title . '" enabled successfully.');
     }
 }

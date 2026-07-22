@@ -20,7 +20,6 @@ class User extends Authenticatable
      * @var list<string>
      */
     protected $fillable = [
-        'name',
         'email',
         'password',
         'role',
@@ -51,6 +50,6 @@ class User extends Authenticatable
 
     public function personalDataSheet()
     {
-        return $this->hasOne(PersonalDataSheets::class, 'user_id');
+        return $this->hasOne(PersonalDataSheets::class, 'emp_id');
     }
 }

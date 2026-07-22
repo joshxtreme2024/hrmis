@@ -60,9 +60,9 @@
                             @yield('quick-actions')
 
                             <!-- Search Button -->
-                            <button class="p-2.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-all duration-200">
+                            <!-- <button class="p-2.5 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none transition-all duration-200">
                                 <i class="bi bi-search text-xl"></i>
-                            </button>
+                            </button> -->
 
                             <!-- Notifications -->
                             <x-notification-dropdown />

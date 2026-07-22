@@ -104,10 +104,10 @@
                 <div class="relative" x-data="{ open: false }" @click.away="open = false">
                     <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none group">
                         <img class="h-8 w-8 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700 group-hover:border-blue-500 transition" 
-                             src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF&size=128' }}" 
-                             alt="{{ Auth::user()->name }}">
+                             src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?email='.urlencode(Auth::user()->email).'&color=7F9CF5&background=EBF4FF&size=128' }}" 
+                             alt="{{ Auth::user()->email }}">
                         <div class="hidden lg:block text-left">
-                            <div class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ Auth::user()->name }}</div>
+                            <div class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ Auth::user()->email }}</div>
                             <div class="text-xs text-gray-500 dark:text-gray-400">{{ Auth::user()->employee_id ?? 'Employee' }}</div>
                         </div>
                         <svg class="hidden lg:block h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
@@ -127,7 +127,7 @@
 
                         <!-- User Info Header -->
                         <div class="px-4 py-3">
-                            <p class="text-sm font-medium text-gray-900 dark:text-white">{{ Auth::user()->name }}</p>
+                            <!-- <p class="text-sm font-medium text-gray-900 dark:text-white">{{ Auth::user()->email }}</p> -->
                             <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ Auth::user()->email }}</p>
                             <div class="mt-2 flex items-center">
                                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
@@ -254,11 +254,11 @@
             <div class="flex items-center px-4">
                 <div class="flex-shrink-0">
                     <img class="h-10 w-10 rounded-full" 
-                         src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF&size=128' }}" 
+                         src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?email='.urlencode(Auth::user()->email).'&color=7F9CF5&background=EBF4FF&size=128' }}" 
                          alt="">
                 </div>
                 <div class="ml-3">
-                    <div class="text-base font-medium text-gray-800 dark:text-gray-200">{{ Auth::user()->name }}</div>
+                    <div class="text-base font-medium text-gray-800 dark:text-gray-200">{{ Auth::user()->email }}</div>
                     <div class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ Auth::user()->email }}</div>
                 </div>
                 <button class="ml-auto text-gray-400 hover:text-gray-500">

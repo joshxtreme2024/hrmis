@@ -97,7 +97,7 @@
                 <p>
                     <span class="text-blue-700 text-lg font-semibold dark:text-blue-100">Aguinaldo, Ifugao, Philippines</span></p>
                 <p class="text-sm text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-                    Streamline HR processes with  comprehensive management solution.
+                    Streamlining HR processes with  comprehensive management solution.
                 </p>
             </div>
 

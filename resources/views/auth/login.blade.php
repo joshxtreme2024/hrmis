@@ -132,7 +132,7 @@
             <button type="submit" 
                     class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform hover:scale-[1.02] transition-all duration-200">
                 <i class="bi bi-box-arrow-in-right mr-2"></i>
-                {{ __('Sign in to Dashboard') }}
+                {{ __('Sign in') }}
             </button>
         </div>
 

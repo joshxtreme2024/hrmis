@@ -4,15 +4,16 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\MyProfileController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\PositionsController;
+use App\Http\Controllers\DepartmentsController;
+use App\Http\Controllers\RoleController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile/update', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -30,7 +31,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/documents/my-documents', [SettingsController::class, 'index'])->name('documents.my-documents');
 
     Route::get('/employees', [SettingsController::class, 'index'])->name('employees.index');
-    Route::get('/departments', [SettingsController::class, 'index'])->name('departments.index');
 
     Route::get('/employment-types', [SettingsController::class, 'index'])->name('employment-types.index');
     
@@ -59,14 +59,28 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/settings/users', [SettingsController::class, 'users'])->name('settings.users');
     Route::get('/settings/roles', [SettingsController::class, 'roles'])->name('settings.roles');
 
+    //settings positions
     Route::get('/settings/positions', [PositionsController::class, 'index'])->name('positions.index');
     Route::get('/settings/positions/show', [PositionsController::class, 'index'])->name('positions.show');
     Route::get('/settings/positions/create', [PositionsController::class, 'create'])->name('positions.create');
-    Route::get('/settings/positions/edit/{position}', [PositionsController::class, 'create'])->name('positions.edit');
+    Route::get('/settings/positions/edit/{position}', [PositionsController::class, 'edit'])->name('positions.edit');
+    Route::post('/settings/positions/edit/{position}', [PositionsController::class, 'update'])->name('positions.update');
     Route::post('/settings/positions/create', [PositionsController::class, 'store'])->name('positions.store');
-    Route::post('/settings/positions/delete/{position}', [PositionsController::class, 'store'])->name('positions.destroy');
+    Route::post('/settings/positions/disable/{position}', [PositionsController::class, 'disable'])->name('positions.disable');
+    Route::post('/settings/positions/enable/{position}', [PositionsController::class, 'enable'])->name('positions.enable');
+
+    //settings departments
+    Route::resource('/settings/departments', DepartmentsController::class);
+    Route::post('/settings/departments/enable/{departments}', [DepartmentsController::class, 'enable'])->name('departments.enable');
+    Route::post('/settings/departments/disable/{departments}', [DepartmentsController::class, 'disable'])->name('departments.disable');
+
+    //roles
+    Route::resource('roles', RoleController::class);
+    Route::get('roles/{role}/permissions', [RoleController::class, 'getPermissions'])->name('roles.permissions');
+    Route::post('roles/{role}/permissions', [RoleController::class, 'updatePermissions'])->name('roles.permissions.update');
 
     Route::get('/settings/system', [SettingsController::class, 'system'])->name('settings.system');
+    
 });
 
 require __DIR__.'/auth.php';
