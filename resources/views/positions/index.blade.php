@@ -50,7 +50,7 @@
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-white font-medium">Departments</p>
-                            <p class="text-2xl font-bold text-white">{{ $positions->pluck('department_id')->unique()->count() }}</p>
+                            <p class="text-2xl font-bold text-white">{{ $depCount }}</p>
                         </div>
                         <div class="w-10 h-10 bg-purple-100 rounded-lg flex items-center justify-center">
                             <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -73,6 +73,7 @@
                             <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Salary Grade</th>
                             <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Reports To</th>
                             <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Created</th>
+                            <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
                             <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
@@ -90,9 +91,6 @@
                                     </div>
                                     <div class="flex-1 min-w-0">
                                         <div class="flex flex-wrap items-center gap-2 mb-1">
-                                            <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full {{ $position->status == 'enabled' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700' }}">
-                                                {{ $position->status == 'enabled' ? 'Enabled' : 'Disabled' }}
-                                            </span>
                                             <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-gradient-to-r from-purple-100 to-purple-50 text-purple-700">
                                                 {{ $position->jobLevel->name }}
                                             </span>
@@ -137,32 +135,43 @@
                                 <div class="text-sm text-gray-600">{{ $position->created_at->format('M d, Y') }}</div>
                                 <div class="text-xs text-gray-400">{{ $position->created_at->diffForHumans() }}</div>
                             </td>
+                            <td class="px-6 py-4 whitespace-nowrap text-center">
+                                <!-- Toggle Switch with Form Submission -->
+                                <div class="flex items-center justify-center">
+                                    <form action="{{ $position->status == 'enabled' ? route('positions.disable', $position) : route('positions.enable', $position) }}" 
+                                          method="POST" 
+                                          class="inline toggle-form"
+                                          id="toggle-form-{{ $position->id }}">
+                                        @csrf
+                                        <label class="relative inline-flex items-center cursor-pointer">
+                                            <input type="checkbox" 
+                                                   class="sr-only peer toggle-checkbox" 
+                                                   data-form-id="toggle-form-{{ $position->id }}"
+                                                   {{ $position->status == 'enabled' ? 'checked' : '' }}>
+                                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                            <span class="ml-3 text-sm font-medium text-gray-700" id="status-label-{{ $position->id }}">
+                                                {{ $position->status == 'enabled' ? 'Enabled' : 'Disabled' }}
+                                            </span>
+                                        </label>
+                                    </form>
+                                </div>
+                            </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center gap-2">
                                     <a href="{{ route('positions.edit', $position) }}" class="p-2 text-amber-600 hover:text-amber-800 hover:bg-amber-50 rounded-lg transition-all duration-200" title="Edit">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                                         </svg>
                                     </a>
-                                    @if($position->status == 'enabled')
-                                    <form action="{{ route('positions.disable', $position) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to disable this position?');">
+                                    <form action="{{ route('positions.destroy', $position) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this position?');">
                                         @csrf
-                                        <button type="submit" class="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200" title="Disable">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"></path>
+                                        @method('DELETE')
+                                        <button type="submit" class="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-all duration-200" title="Delete">
+                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                             </svg>
                                         </button>
                                     </form>
-                                    @else
-                                    <form action="{{ route('positions.enable', $position) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to enable this position?');">
-                                        @csrf
-                                        <button type="submit" class="p-2 text-green-600 hover:text-green-800 hover:bg-green-50 rounded-lg transition-all duration-200" title="Enable">
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                            </svg>
-                                        </button>
-                                    </form>
-                                    @endif
                                 </div>
                             </td>
                         </tr>
@@ -200,4 +209,46 @@
         </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get all toggle checkboxes
+    const checkboxes = document.querySelectorAll('.toggle-checkbox');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            // Find the form associated with this checkbox
+            const formId = this.dataset.formId;
+            const form = document.getElementById(formId);
+            
+            if (form) {
+                // Show loading state on the checkbox
+                this.disabled = true;
+                
+                // Submit the form
+                form.submit();
+            }
+        });
+    });
+});
+</script>
+
+<style>
+    /* Custom toggle styling */
+    .peer:checked ~ .peer-checked\:bg-indigo-600 {
+        background-color: #4f46e5;
+    }
+    
+    .peer:focus ~ .peer-focus\:ring-4 {
+        box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.3);
+    }
+    
+    /* Disable pointer events while submitting */
+    .toggle-checkbox:disabled {
+        cursor: not-allowed;
+        opacity: 0.6;
+    }
+</style>
+@endpush
 @endsection

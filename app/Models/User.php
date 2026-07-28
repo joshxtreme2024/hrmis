@@ -23,6 +23,7 @@ class User extends Authenticatable
         'email',
         'password',
         'role',
+        'status',
     ];
 
     /**
@@ -50,6 +51,22 @@ class User extends Authenticatable
 
     public function personalDataSheet()
     {
-        return $this->hasOne(PersonalDataSheets::class, 'emp_id');
+        return $this->hasOne(PersonalDataSheets::class, 'user_id');
+    }
+
+    public function getDisplayNameAttribute()
+    {
+        if ($this->personalDataSheet) {
+            return $this->personalDataSheet->completeName();
+        }
+        return $this->name;
+    }
+
+    public function getDisplayInitialsAttribute()
+    {
+        if ($this->personalDataSheet) {
+            return $this->personalDataSheet->getInitialsAttribute();
+        }
+        return $this->name;
     }
 }

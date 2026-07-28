@@ -6,7 +6,9 @@ use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\PositionsController;
 use App\Http\Controllers\DepartmentsController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\UsersController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\PersonalDataSheetsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -51,28 +53,27 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/payroll/benefits', [SettingsController::class, 'index'])->name('reports.index');
 
-    
+    Route::resource('pds', PersonalDataSheetsController::class);
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
-    Route::get('/settings/users', [SettingsController::class, 'users'])->name('settings.users');
     Route::get('/settings/roles', [SettingsController::class, 'roles'])->name('settings.roles');
 
+    Route::resource('/settings/users', UsersController::class);
+    Route::post('/users/{user}/enable', [UsersController::class, 'enable'])->name('users.enable');
+    Route::post('/users/{user}/disable', [UsersController::class, 'disable'])->name('users.disable');
+    Route::put('/users/{user}/change-role', [UsersController::class, 'changeRole'])->name('users.changeRole');
+
     //settings positions
-    Route::get('/settings/positions', [PositionsController::class, 'index'])->name('positions.index');
-    Route::get('/settings/positions/show', [PositionsController::class, 'index'])->name('positions.show');
-    Route::get('/settings/positions/create', [PositionsController::class, 'create'])->name('positions.create');
-    Route::get('/settings/positions/edit/{position}', [PositionsController::class, 'edit'])->name('positions.edit');
-    Route::post('/settings/positions/edit/{position}', [PositionsController::class, 'update'])->name('positions.update');
-    Route::post('/settings/positions/create', [PositionsController::class, 'store'])->name('positions.store');
-    Route::post('/settings/positions/disable/{position}', [PositionsController::class, 'disable'])->name('positions.disable');
-    Route::post('/settings/positions/enable/{position}', [PositionsController::class, 'enable'])->name('positions.enable');
+    Route::resource('/settings/positions', PositionsController::class);
+    Route::post('/positions/{position}/enable', [PositionsController::class, 'enable'])->name('positions.enable');
+    Route::post('/positions/{position}/disable', [PositionsController::class, 'disable'])->name('positions.disable');
 
     //settings departments
     Route::resource('/settings/departments', DepartmentsController::class);
-    Route::post('/settings/departments/enable/{departments}', [DepartmentsController::class, 'enable'])->name('departments.enable');
-    Route::post('/settings/departments/disable/{departments}', [DepartmentsController::class, 'disable'])->name('departments.disable');
+    Route::post('/departments/{department}/enable', [DepartmentsController::class, 'enable'])->name('departments.enable');
+    Route::post('/departments/{department}/disable', [DepartmentsController::class, 'disable'])->name('departments.disable');
 
     //roles
     Route::resource('roles', RoleController::class);

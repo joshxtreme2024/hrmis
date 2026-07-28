@@ -1,10 +1,10 @@
 <div class="relative" x-data="{ open: false }" @click.away="open = false">
     <button @click="open = !open" class="flex items-center space-x-2 focus:outline-none group">
         <img class="h-8 w-8 rounded-full object-cover border-2 border-gray-200 dark:border-gray-700 group-hover:border-blue-500 transition" 
-             src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->name).'&color=7F9CF5&background=EBF4FF&size=128' }}" 
-             alt="{{ Auth::user()->name }}">
+             src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?name='.urlencode(Auth::user()->getDisplayNameAttribute()).'&color=7F9CF5&background=EBF4FF&size=128' }}" 
+             alt="{{ Auth::user()->getDisplayNameAttribute() }}">
         <div class="hidden lg:block text-left">
-            <div class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ Auth::user()->name }}</div>
+            <div class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ Auth::user()->getDisplayNameAttribute() }}</div>
             <div class="text-xs text-gray-500 dark:text-gray-400">{{ Auth::user()->email ?? 'Employee' }}</div>
         </div>
         <i class="bi-chevron-down text-xs text-gray-400"></i>

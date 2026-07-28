@@ -66,16 +66,16 @@
                 </div>
                 <div class="flex space-x-6 pl-10 py-2">
                     <label class="inline-flex items-center">
-                        <input type="radio" name="status" value="active" 
+                        <input type="radio" name="status" value="enabled" 
                                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300" 
-                               {{ old('status', isset($department) ? $department->status : 'active') == 'active' ? 'checked' : '' }} required>
-                        <span class="ml-2 text-sm text-gray-700">Active</span>
+                               {{ old('status', isset($department) ? $department->status : 'enabled') == 'enabled' ? 'checked' : '' }} required>
+                        <span class="ml-2 text-sm text-gray-700">Enabled</span>
                     </label>
                     <label class="inline-flex items-center">
-                        <input type="radio" name="status" value="inactive" 
+                        <input type="radio" name="status" value="disabled" 
                                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300" 
-                               {{ old('status', isset($department) ? $department->status : '') == 'inactive' ? 'checked' : '' }}>
-                        <span class="ml-2 text-sm text-gray-700">Inactive</span>
+                               {{ old('status', isset($department) ? $department->status : '') == 'disabled' ? 'checked' : '' }}>
+                        <span class="ml-2 text-sm text-gray-700">Disabled</span>
                     </label>
                 </div>
             </div>

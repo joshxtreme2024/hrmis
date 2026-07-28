@@ -120,7 +120,7 @@ $menuItems = [
         'badge' => null,
         'color' => 'from-gray-500 to-gray-600',
         'submenu' => [
-            ['title' => 'User Management', 'route' => 'settings.users', 'icon' => 'bi-person-gear', 'permission' => 'manage-users'],
+            ['title' => 'User Management', 'route' => 'users.index', 'icon' => 'bi-person-gear', 'permission' => 'manage-users'],
             ['title' => 'Manage Departments', 'route' => 'departments.index', 'icon' => 'bi-building-gear', 'permission' => 'manage-departments'],
             ['title' => 'Office Positions', 'route' => 'positions.index', 'icon' => 'bi-house-gear', 'permission' => 'manage-positions'],
             ['title' => 'Roles & Permissions', 'route' => 'roles.index', 'icon' => 'bi-shield', 'permission' => 'manage-roles'],
@@ -175,12 +175,12 @@ foreach($menuItems as $item) {
     </div> -->
 
     <!-- User Quick Info -->
-    <div class="px-4 py-3 border-b border-gray-200/80 dark:border-gray-700/80 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800">
+    <!-- <div class="px-4 py-3 border-b border-gray-200/80 dark:border-gray-700/80 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800">
         <div class="flex items-center space-x-3">
             <div class="relative">
                 <img class="h-10 w-10 rounded-xl object-cover border-2 border-white dark:border-gray-700 shadow-md" 
-                     src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?email='.urlencode(Auth::user()->email).'&background=2563eb&color=fff&bold=true&size=128' }}" 
-                     alt="{{ Auth::user()->email }}">
+                     src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?email='.urlencode(Auth::user()->getDisplayNameAttribute()).'&background=2563eb&color=fff&bold=true&size=128' }}" 
+                     alt="{{ Auth::user()->getDisplayNameAttribute() }}">
                 <span class="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-white dark:ring-gray-800"></span>
             </div>
             <div class="flex-1 min-w-0">
@@ -211,7 +211,7 @@ foreach($menuItems as $item) {
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
 
     <!-- Navigation Menu -->
     <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
@@ -242,7 +242,7 @@ foreach($menuItems as $item) {
                             </span>
                             <div class="flex items-center space-x-2">
                                 @if($item['badge'])
-                                    <span class="px-2 py-0.5 text-xs bg-white/20 text-white rounded-full">{{ $item['badge'] }}</span>
+                                    <span class="px-2 py-0.5 text-xs bg-white/20 text-red-500 rounded-full">{{ $item['badge'] }}</span>
                                 @endif
                                 <i class="bi bi-chevron-right text-sm transition-transform duration-200" :class="{ 'rotate-90': open }"></i>
                             </div>

@@ -38,7 +38,8 @@
             <!-- Form Body -->
             <form action="{{ route('positions.update', $position) }}" method="POST" class="p-8">
                 @csrf
-
+                @method('PUT')
+                
                 <div class="space-y-8">
                     <!-- Row 1: Title and Department -->
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">

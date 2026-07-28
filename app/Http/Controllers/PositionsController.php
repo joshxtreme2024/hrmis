@@ -16,7 +16,9 @@ class PositionsController extends Controller
     public function index()
     {
          $positions = Positions::paginate(10);
-        return view('positions.index', compact('positions'));
+         $depCount = Departments::count();
+         $jobLevelCount = JobLevels::count();
+        return view('positions.index', compact('positions', 'depCount', 'jobLevelCount'));
     }
 
     /**
@@ -162,5 +164,22 @@ class PositionsController extends Controller
 
         return redirect()->route('positions.index')
                         ->with('success', 'Position "' . $title . '" enabled successfully.');
+    }
+
+    public function destroy(Positions $position)
+    {
+        // Check if there are any positions reporting to this one
+        $hasSubordinates = Positions::where('reports_to_id', $position->id)->exists();
+        
+        if ($hasSubordinates) {
+            return redirect()->route('positions.index')
+                            ->with('error', 'Cannot delete this position because other positions report to it.');
+        }
+
+        $title = $position->title;
+        $position->delete();
+
+        return redirect()->route('positions.index')
+                        ->with('success', 'Position "' . $title . '" deleted successfully.');
     }
 }
