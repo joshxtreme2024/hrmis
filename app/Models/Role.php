@@ -9,26 +9,43 @@ class Role extends Model
 {
     use HasFactory;
     
-    protected $fillable = ['name'];
+    protected $fillable = ['name', 'label', 'description'];
     
     /**
-     * Get the permissions for the role.
+     * ✅ Get the permissions for the role.
+     * Correct pivot table name: role_has_permissions
      */
     public function permissions()
     {
-        return $this->belongsToMany(Permission::class, 'role_permission');
+        return $this->belongsToMany(Permission::class, 'role_has_permissions');
     }
     
     /**
-     * Get the users that have this role.
+     * ❌ REMOVE THIS - You don't need it since users have a role column
+     * public function users()
+     * {
+     *     return $this->belongsToMany(User::class, 'role');
+     * }
      */
-    public function users()
+    
+    /**
+     * ✅ Get all users with this role (using the role column)
+     */
+    public function getUsers()
     {
-        return $this->belongsToMany(User::class, 'role_user');
+        return User::where('role', $this->name)->get();
     }
     
     /**
-     * Check if role has a permission.
+     * ✅ Get the count of users with this role
+     */
+    public function getUsersCountAttribute()
+    {
+        return User::where('role', $this->name)->count();
+    }
+    
+    /**
+     * ✅ Check if role has a permission
      */
     public function hasPermission($permissionName)
     {
@@ -36,7 +53,7 @@ class Role extends Model
     }
     
     /**
-     * Assign a permission to the role.
+     * ✅ Assign a permission to the role
      */
     public function assignPermission($permission)
     {
@@ -48,7 +65,7 @@ class Role extends Model
     }
     
     /**
-     * Remove a permission from the role.
+     * ✅ Remove a permission from the role
      */
     public function removePermission($permission)
     {
@@ -57,5 +74,25 @@ class Role extends Model
         }
         
         $this->permissions()->detach($permission->id);
+    }
+    
+    /**
+     * ✅ Sync permissions for the role
+     */
+    public function syncPermissions(array $permissions)
+    {
+        $permissionIds = [];
+        foreach ($permissions as $perm) {
+            if (is_string($perm)) {
+                $permission = Permission::where('name', $perm)->first();
+                if ($permission) {
+                    $permissionIds[] = $permission->id;
+                }
+            } else {
+                $permissionIds[] = $perm;
+            }
+        }
+        
+        $this->permissions()->sync($permissionIds);
     }
 }

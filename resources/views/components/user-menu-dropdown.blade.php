@@ -24,11 +24,11 @@
             <div class="mt-2 flex items-center">
                 <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-green-200">
                     @if(Auth::user()->role === 'admin')
-                        <i class="bi bi-shield-lock-fill me-1 text-gray-400"></i> Administrator
-                    @elseif(Auth::user()->role === 'hr_manager')
-                        <i class="bi bi-shield-check me-1 text-gray-400"></i> HR Manager
+                        <i class="bi bi-shield-lock-fill me-1 text-purple-400"></i> Administrator
+                    @elseif(Auth::user()->role === 'hr')
+                        <i class="bi bi-shield-check me-1 text-blue-400"></i> HR Manager
                     @else   
-                        <i class="bi bi-briefcase me-1 text-gray-400"></i> Employee
+                        <i class="bi bi-briefcase me-1 text-emerald-400"></i> Employee
                     @endif
                 </span>
             </div>

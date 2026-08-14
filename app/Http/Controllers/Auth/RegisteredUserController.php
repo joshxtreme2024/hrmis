@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
-use App\Models\PersonalDataSheets;
+use App\Models\PDSPersonalData;
 
 class RegisteredUserController extends Controller
 {
@@ -51,13 +51,12 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        PersonalDataSheets::create([
+        PDSPersonalData::create([
             'user_id' => $user->id,
             'first_name' => strtoupper($request->first_name),
-            'last_name' => strtoupper($request->last_name),
             'middle_name' => strtoupper($request->middle_name),
-            'name_extension' => strtoupper($request->name_extension),
-            'email_address' => $request->email,
+            'last_name' => strtoupper($request->last_name),
+            'ext_name' => strtoupper($request->name_extension),
         ]);
 
         event(new Registered($user));

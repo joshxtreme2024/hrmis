@@ -1,5 +1,14 @@
 @extends('layouts.app')
-
+@section('breadcrumbs')
+    <li class="flex items-center">
+        <i class="bi bi-chevron-right text-gray-300 dark:text-gray-600 mx-2 text-xs"></i>
+        <span class="text-gray-800 dark:text-gray-200 font-medium">Settings</span>
+    </li>
+    <li class="flex items-center">
+        <i class="bi bi-chevron-right text-gray-300 dark:text-gray-600 mx-2 text-xs"></i>
+        <span class="text-gray-800 dark:text-gray-200 font-medium">Departments</span>
+    </li>
+@endsection
 @section('content')
 <div class="py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

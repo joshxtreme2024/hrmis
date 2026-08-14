@@ -8,6 +8,12 @@
 
     <title>{{ config('app.name', 'HRMS') }} - @yield('title', 'Authentication')</title>
 
+    @if(setting('favicon'))
+        <link rel="icon" href="{{ asset('storage/' . setting('favicon')) }}">
+    @else
+        <link rel="icon" href="{{ asset('favicon.ico') }}">
+    @endif
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700&display=swap" rel="stylesheet" />

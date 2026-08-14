@@ -1,5 +1,14 @@
 @extends('layouts.app')
-
+@section('breadcrumbs')
+    <li class="flex items-center">
+        <i class="bi bi-chevron-right text-gray-300 dark:text-gray-600 mx-2 text-xs"></i>
+        <span class="text-gray-800 dark:text-gray-200 font-medium">Settings</span>
+    </li>
+    <li class="flex items-center">
+        <i class="bi bi-chevron-right text-gray-300 dark:text-gray-600 mx-2 text-xs"></i>
+        <span class="text-gray-800 dark:text-gray-200 font-medium">Users</span>
+    </li>
+@endsection
 @section('content')
 <div class="py-6">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -103,11 +112,23 @@
                                     <div class="flex-1 min-w-0">
                                         <div class="flex flex-wrap items-center gap-2 mb-1">
                                             @if($user->role == 'admin')
-                                            <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-gradient-to-r from-red-500 to-red-300 text-red-700">
+                                            <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-gradient-to-r from-red-400 to-red-300 text-red-700">
                                                 <div class="text-md font-semibold text-gray-900">{{ $user->getDisplayNameAttribute() ?? 'Admin' }}</div>
                                             </span>
+                                            @elseif($user->role == 'hr')
+                                            <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-gradient-to-r from-purple-400 to-purple-300 text-purple-700">
+                                                <div class="text-md font-semibold text-gray-900">{{ $user->getDisplayNameAttribute() ?? 'HR Manager' }}</div>
+                                            </span>
+                                            @elseif($user->role == 'employee')
+                                            <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-gradient-to-r from-orange-400 to-orange-300 text-orange-700">
+                                                <div class="text-md font-semibold text-gray-900">{{ $user->getDisplayNameAttribute() ?? 'Employee' }}</div>
+                                            </span>
+                                            @elseif($user->role == 'finance')
+                                            <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-gradient-to-r from-blue-400 to-blue-300 text-blue-700">
+                                                <div class="text-md font-semibold text-gray-900">{{ $user->getDisplayNameAttribute() ?? 'Finance' }}</div>
+                                            </span>
                                             @else
-                                            <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-gradient-to-r from-blue-100 to-blue-50 text-blue-700">
+                                            <span class="px-2.5 py-0.5 text-xs font-semibold rounded-full bg-gradient-to-r from-gray-400 to-gray-300 text-gray-700">
                                                 <div class="text-md font-semibold text-gray-900">{{ $user->getDisplayNameAttribute() ?? 'N/A' }}</div>
                                             </span>
                                             @endif

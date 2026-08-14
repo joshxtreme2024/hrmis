@@ -22,7 +22,11 @@
     @stack('styles')
 
     <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{{ asset('favicon.ico') }}">
+    @if(setting('favicon'))
+    <link rel="icon" href="{{ asset('storage/' . setting('favicon')) }}">
+    @else
+        <link rel="icon" href="{{ asset('favicon.ico') }}">
+    @endif
 </head>
 <body class="font-sans antialiased bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 h-full">
     <div class="h-full flex">
@@ -175,6 +179,179 @@
             overlay.classList.toggle('hidden');
         }
     </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('editChildForm');
+            
+            if (form) {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Show loading
+                    if (typeof Swal !== 'undefined') {
+                        Swal.fire({
+                            title: 'Updating...',
+                            text: 'Please wait while we update the child record',
+                            allowOutsideClick: false,
+                            didOpen: () => {
+                                Swal.showLoading();
+                            }
+                        });
+                    }
+                    
+                    const formData = new FormData(this);
+                    const url = this.action;
+                    
+                    fetch(url, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || '',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => {
+                                throw new Error(err.message || 'Update failed');
+                            });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Close the SweetAlert
+                        if (typeof Swal !== 'undefined') {
+                            Swal.close();
+                        }
+                        
+                        // Display success message
+                        displaySuccessMessage(data.message || 'Child record updated successfully');
+                        
+                        // Close modal
+                        closeEditChildModal();
+                        
+                        // Update the table row instead of reloading
+                        updateTableRow(data.child);
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Update Failed',
+                                text: error.message || 'There was an error updating the child record. Please try again.',
+                                confirmButtonColor: '#6366f1'
+                            });
+                        } else {
+                            alert('Update failed: ' + error.message);
+                        }
+                    });
+                });
+            }
+        });
+
+        // Function to display success message
+        function displaySuccessMessage(message) {
+            // Find or create success message container
+            let messageContainer = document.getElementById('success-message-container');
+            
+            if (!messageContainer) {
+                // Create container if it doesn't exist
+                messageContainer = document.createElement('div');
+                messageContainer.id = 'success-message-container';
+                messageContainer.className = 'mb-4';
+                
+                // Insert it at the top of the content area
+                const contentArea = document.querySelector('.space-y-6');
+                if (contentArea) {
+                    contentArea.insertBefore(messageContainer, contentArea.firstChild);
+                }
+            }
+            
+            // Create the success message HTML
+            messageContainer.innerHTML = `
+                <div class="rounded-xl bg-green-50 dark:bg-green-900/20 p-4 border border-green-200 dark:border-green-800 shadow-sm animate-fade-in">
+                    <div class="flex">
+                        <div class="flex-shrink-0">
+                            <i class="bi bi-check-circle-fill text-green-400 dark:text-green-600 text-lg"></i>
+                        </div>
+                        <div class="ml-3">
+                            <p class="text-sm font-medium text-green-800 dark:text-green-300">${escapeHtml(message)}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                const messageElement = messageContainer.querySelector('.rounded-xl');
+                if (messageElement) {
+                    messageElement.style.transition = 'opacity 0.5s ease';
+                    messageElement.style.opacity = '0';
+                    setTimeout(() => {
+                        messageContainer.innerHTML = '';
+                    }, 500);
+                }
+            }, 5000);
+        }
+
+        // Function to update table row without reloading
+        function updateTableRow(childData) {
+            // Find the row by child ID
+            const rows = document.querySelectorAll('tbody tr');
+            rows.forEach(row => {
+                const editButton = row.querySelector(`button[data-child-id="${childData.id}"]`);
+                if (editButton) {
+                    // Update the name
+                    const nameCell = row.querySelector('td:nth-child(2)');
+                    if (nameCell) {
+                        const nameSpan = nameCell.querySelector('.text-sm.font-medium');
+                        if (nameSpan) {
+                            nameSpan.textContent = childData.name;
+                        }
+                        // Update the avatar initial
+                        const avatarSpan = nameCell.querySelector('.text-xs.font-semibold');
+                        if (avatarSpan) {
+                            avatarSpan.textContent = childData.name.charAt(0).toUpperCase();
+                        }
+                    }
+                    
+                    // Update the date of birth
+                    const dobCell = row.querySelector('td:nth-child(3)');
+                    if (dobCell) {
+                        const dob = new Date(childData.date_of_birth);
+                        const formattedDate = dob.toLocaleDateString('en-US', {
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric'
+                        });
+                        dobCell.textContent = formattedDate;
+                    }
+                    
+                    // Update sex
+                    const sexCell = row.querySelector('td:nth-child(4)');
+                    if (sexCell) {
+                        sexCell.textContent = childData.sex || '—';
+                    }
+                    
+                    // Highlight the updated row
+                    row.style.transition = 'background-color 0.5s ease';
+                    row.style.backgroundColor = '#bbf7d0'; // Light green
+                    setTimeout(() => {
+                        row.style.backgroundColor = '';
+                    }, 2000);
+                }
+            });
+        }
+
+        // Helper function to escape HTML
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        </script>
 
     @stack('scripts')
 

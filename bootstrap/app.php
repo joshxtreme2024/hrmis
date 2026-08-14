@@ -15,7 +15,18 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'settings' => \App\Http\Middleware\ApplySettings::class,
+            'maintenance' => \App\Http\Middleware\CheckMaintenance::class,
         ]);
+        $middleware->append(\App\Http\Middleware\ApplySettings::class);
+        
+        // Add maintenance middleware to web group
+        $middleware->appendToGroup('web', [
+            \App\Http\Middleware\CheckMaintenance::class,
+        ]);
+        
+        // Or apply globally
+        // $middleware->append(\App\Http\Middleware\CheckMaintenance::class);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //

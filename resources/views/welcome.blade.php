@@ -8,6 +8,12 @@
 
     <title>{{ config('app.name', 'HRMIS') }} | Human Resource Management System</title>
 
+    @if(setting('favicon'))
+    <link rel="icon" href="{{ asset('storage/' . setting('favicon')) }}">
+    @else
+        <link rel="icon" href="{{ asset('favicon.ico') }}">
+    @endif
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet" />
@@ -32,6 +38,21 @@
     </script>
 
     <style>
+        /* logo */
+        @keyframes fadeUp {
+            0% {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fade-up {
+            animation: fadeUp 0.7s ease-out forwards;
+        }
+
         /* Custom Styles */
         .gradient-agui {
             background: linear-gradient(135deg, #1a3a8a 0%, #2563eb 50%, #3b82f6 100%);
@@ -182,7 +203,7 @@
     <div class="split-container">
         
         <!-- Left Side: LGU Photo (50%) -->
-        <div class="image-side">
+        <div class="image-side animate-fade-up">
             <!-- LGU Photo -->
             <img 
                 src="{{ asset('images/lgu.JPG') }}"
@@ -211,6 +232,13 @@
             
             <!-- Title -->
             <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-4">
+                <div class="animate-fade-up">
+                    @if(setting('logo'))
+                        <img src="{{ asset('storage/' . setting('logo')) }}" alt="Logo" class="w-auto h-60">
+                    @else
+                        <img src="{{ asset('images/default-logo.png') }}" alt="Default Logo" class="h-60 w-auto">
+                    @endif
+                </div>
                 <span class="gradient-agui">Aguinaldo</span>
                 <br>
                 <span class="gradient-text">Human Resource</span>
@@ -267,6 +295,14 @@
                     @endauth
                 </div>
             @endif
+
+            <div class="mt-6 text-sm text-gray-500 dark:text-gray-400">
+                Visit the
+                <a href="{{ setting('company_website') }}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">
+                    Official website
+                </a>
+                of the Municipality of Aguinaldo, Ifugao for latest news.
+            </div>
 
             <!-- Version / Security -->
             <p class="text-xs text-gray-400 dark:text-gray-500 mt-8 flex items-center gap-2">

@@ -1,25 +1,68 @@
 @props(['collapsible' => true])
 
 @php
-// Debug: Check if user is logged in
-$user = auth()->user();
-$isLoggedIn = $user ? 'Yes' : 'No';
+use App\Models\Role;
 
-// Define menu items
+// Get current user
+$user = auth()->user();
+
+// Define helper functions for permission and role checks
+function userHasPermission($permissionName) {
+    $user = auth()->user();
+    if (!$user) return false;
+    
+    // Admin has all permissions
+    if ($user->role === 'admin') return true;
+    
+    // Get the role instance
+    $role = App\Models\Role::where('name', $user->role)->first();
+    if (!$role) return false;
+    
+    // Check if role has the permission
+    return $role->permissions()->where('name', $permissionName)->exists();
+}
+
+function userHasRole($roleName) {
+    $user = auth()->user();
+    if (!$user) return false;
+    
+    if (is_array($roleName)) {
+        return in_array($user->role, $roleName);
+    }
+    return $user->role === $roleName;
+}
+
+function userCan($permission) {
+    if (!$permission) return true;
+    return userHasPermission($permission);
+}
+
+// Define menu items with both role and permission checks
 $menuItems = [
     [
         'title' => 'Dashboard',
         'icon' => 'bi-speedometer2',
         'route' => 'dashboard',
-        'permission' => null, // No permission needed
+        'permission' => null,
+        'role' => null,
+        'badge' => null,
+        'color' => 'from-blue-500 to-blue-600'
+    ],
+    [
+        'title' => 'My PDS Profile',
+        'icon' => 'bi bi-person-circle',
+        'route' => 'myprofile.show',
+        'permission' => null,
+        'role' => null,
         'badge' => null,
         'color' => 'from-blue-500 to-blue-600'
     ],
     [
         'title' => 'Employee Management',
         'icon' => 'bi-people',
-        'permission' => 'view-employees', // This permission might not exist
-        'badge' => '12',
+        'permission' => 'view-employees',
+        'role' => ['admin', 'hr'],
+        'badge' => null,
         'color' => 'from-emerald-500 to-teal-600',
         'submenu' => [
             ['title' => 'All Employees', 'route' => 'employees.index', 'icon' => 'bi-person-badge', 'permission' => 'view-employees'],
@@ -32,7 +75,8 @@ $menuItems = [
         'title' => 'Attendance',
         'icon' => 'bi-clock-history',
         'permission' => 'view-attendance',
-        'badge' => '3 pending',
+        'role' => ['admin', 'hr', 'employee'],
+        'badge' => null,
         'color' => 'from-orange-500 to-amber-600',
         'submenu' => [
             ['title' => 'Daily Attendance', 'route' => 'attendance.daily', 'icon' => 'bi-calendar-day', 'permission' => 'view-attendance'],
@@ -45,19 +89,21 @@ $menuItems = [
         'title' => 'Leave Mngt.',
         'icon' => 'bi-calendar-check',
         'permission' => 'view-leave',
+        'role' => ['admin', 'hr', 'employee'],
         'badge' => '8 requests',
         'color' => 'from-purple-500 to-pink-600',
         'submenu' => [
-            ['title' => 'Leave Requests', 'route' => 'leave.requests', 'icon' => 'bi-inbox', 'permission' => 'view-leave'],
+            ['title' => 'Leave Requests', 'route' => 'leave.requests', 'icon' => 'bi-inbox', 'permission' => 'view-leave', 'role' => ['admin', 'hr']],
             ['title' => 'Leave Calendar', 'route' => 'leave.calendar', 'icon' => 'bi-calendar3', 'permission' => 'view-leave'],
-            ['title' => 'Leave Types', 'route' => 'leave.types', 'icon' => 'bi-tag', 'permission' => 'view-leave-types'],
-            ['title' => 'My Leaves', 'route' => 'leave.my-requests', 'icon' => 'bi-person-check', 'permission' => null], // No permission needed for personal leaves
+            ['title' => 'Leave Types', 'route' => 'leave.types', 'icon' => 'bi-tag', 'permission' => 'view-leave-types', 'role' => ['admin', 'hr']],
+            ['title' => 'My Leaves', 'route' => 'leave.my-requests', 'icon' => 'bi-person-check', 'permission' => null],
         ]
     ],
     [
         'title' => 'Payroll',
         'icon' => 'bi-cash-stack',
         'permission' => 'view-payroll',
+        'role' => ['admin', 'hr'],
         'badge' => null,
         'color' => 'from-green-500 to-emerald-600',
         'submenu' => [
@@ -71,6 +117,7 @@ $menuItems = [
         'title' => 'Recruitment',
         'icon' => 'bi-person-plus',
         'permission' => 'view-recruitment',
+        'role' => ['admin', 'hr'],
         'badge' => '5 new',
         'color' => 'from-cyan-500 to-sky-600',
         'submenu' => [
@@ -84,6 +131,7 @@ $menuItems = [
         'title' => 'Performance',
         'icon' => 'bi-graph-up',
         'permission' => 'view-performance',
+        'role' => ['admin', 'hr'],
         'badge' => null,
         'color' => 'from-indigo-500 to-blue-600',
         'submenu' => [
@@ -98,6 +146,7 @@ $menuItems = [
         'icon' => 'bi-pie-chart',
         'route' => 'reports.index',
         'permission' => 'view-reports',
+        'role' => ['admin', 'hr'],
         'badge' => null,
         'color' => 'from-red-500 to-rose-600'
     ],
@@ -105,18 +154,20 @@ $menuItems = [
         'title' => 'Documents',
         'icon' => 'bi-folder2',
         'permission' => 'view-documents',
+        'role' => ['admin', 'hr'],
         'badge' => null,
         'color' => 'from-amber-500 to-yellow-600',
         'submenu' => [
-            ['title' => 'Employee Documents', 'route' => 'documents.employees', 'icon' => 'bi-folder', 'permission' => 'view-employee-documents'],
-            ['title' => 'Company Documents', 'route' => 'documents.company', 'icon' => 'bi-building', 'permission' => 'view-company-documents'],
-            ['title' => 'Templates', 'route' => 'documents.templates', 'icon' => 'bi-file-text', 'permission' => 'view-templates'],
+            ['title' => 'Employee Documents', 'route' => 'employee.documents.index', 'icon' => 'bi-folder', 'permission' => 'view-employee-documents'],
+            ['title' => 'Company Documents', 'route' => 'company.documents.index', 'icon' => 'bi-building', 'permission' => 'view-company-documents'],
+            ['title' => 'Templates', 'route' => 'templates.documents.index', 'icon' => 'bi-file-text', 'permission' => 'view-templates'],
         ]
     ],
     [
         'title' => 'Settings',
         'icon' => 'bi-gear',
         'permission' => 'manage-settings',
+        'role' => ['admin'],
         'badge' => null,
         'color' => 'from-gray-500 to-gray-600',
         'submenu' => [
@@ -129,20 +180,50 @@ $menuItems = [
     ],
 ];
 
-// Debug: Count total menu items
-$totalMenuItems = count($menuItems);
-
-// Debug: Count menu items after permission filtering
-$visibleMenuItems = 0;
-foreach($menuItems as $item) {
-    $showItem = true;
-    if(isset($item['permission']) && $item['permission']) {
-        $showItem = auth()->user()->can($item['permission']);
+// Filter menu items based on role and permission
+function shouldShowMenuItem($item) {
+    $user = auth()->user();
+    
+    // 🔥 ADMIN BYPASS - Admin sees everything
+    if ($user && $user->role === 'admin') {
+        return true;
     }
-    if($showItem) {
-        $visibleMenuItems++;
+    
+    // Check role first (for non-admin users)
+    if (isset($item['role']) && $item['role']) {
+        if (!userHasRole($item['role'])) {
+            return false;
+        }
+    }
+    
+    // Check permission (for non-admin users)
+    if (isset($item['permission']) && $item['permission']) {
+        if (!userCan($item['permission'])) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+// Filter all menu items
+$filteredMenuItems = array_filter($menuItems, function($item) {
+    return shouldShowMenuItem($item);
+});
+
+// Filter submenu items
+foreach ($filteredMenuItems as &$item) {
+    if (isset($item['submenu'])) {
+        $item['submenu'] = array_filter($item['submenu'], function($subItem) {
+            return shouldShowMenuItem($subItem);
+        });
     }
 }
+
+unset($item);
+
+// Count visible items
+$visibleMenuItems = count($filteredMenuItems);
 @endphp
 
 <!-- Desktop Sidebar -->
@@ -164,136 +245,101 @@ foreach($menuItems as $item) {
         </div>
     </div>
 
-    <!-- Search Box with Icon -->
-    <!-- <div class="p-4 border-b border-gray-200/80 dark:border-gray-700/80">
-        <div class="relative group">
-            <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 group-hover:text-blue-500 transition-colors"></i>
-            <input type="text" 
-                   placeholder="Quick search..." 
-                   class="w-full pl-10 pr-4 py-2.5 text-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl text-gray-700 dark:text-gray-300 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all">
+    <!-- Debug Info (Remove in production) -->
+    @if(config('app.debug'))
+    <div class="px-4 py-2 bg-gray-100 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 text-xs">
+        <div class="text-gray-500 dark:text-gray-400">
+            <span class="font-semibold">Role:</span> {{ auth()->user()->role ?? 'None' }}
+            <span class="ml-2 font-semibold">Permissions:</span> 
+            @php
+                $role = App\Models\Role::where('name', auth()->user()->role)->first();
+                $perms = $role ? $role->permissions()->pluck('name')->toArray() : [];
+            @endphp
+            {{ implode(', ', array_slice($perms, 0, 3)) }}
+            @if(count($perms) > 3)
+                +{{ count($perms) - 3 }} more
+            @endif
         </div>
-    </div> -->
-
-    <!-- User Quick Info -->
-    <!-- <div class="px-4 py-3 border-b border-gray-200/80 dark:border-gray-700/80 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800">
-        <div class="flex items-center space-x-3">
-            <div class="relative">
-                <img class="h-10 w-10 rounded-xl object-cover border-2 border-white dark:border-gray-700 shadow-md" 
-                     src="{{ Auth::user()->profile_photo_url ?? 'https://ui-avatars.com/api/?email='.urlencode(Auth::user()->getDisplayNameAttribute()).'&background=2563eb&color=fff&bold=true&size=128' }}" 
-                     alt="{{ Auth::user()->getDisplayNameAttribute() }}">
-                <span class="absolute bottom-0 right-0 block h-2.5 w-2.5 rounded-full bg-green-500 ring-2 ring-white dark:ring-gray-800"></span>
-            </div>
-            <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ Auth::user()->email }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 flex items-center">
-                    <i class="bi bi-briefcase me-1"></i>
-                    {{ Auth::user()->personalDataSheet->first_name ?? 'Administrator' }}
-                </p>
-            </div>
-            <div class="relative" x-data="{ open: false }">
-                <button @click="open = !open" class="p-2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 rounded-lg hover:bg-gray-200/50 dark:hover:bg-gray-700 transition-all">
-                    <i class="bi bi-three-dots-vertical"></i>
-                </button>
-                <div x-show="open" @click.away="open = false" class="absolute bottom-full right-0 mb-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-lg ring-1 ring-black ring-opacity-5 py-1 z-50">
-                    <a href="{{ route('myprofile.show') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <i class="bi bi-person me-2"></i> Profile
-                    </a>
-                    <a href="{{ route('profile.edit') }}" class="flex items-center px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                        <i class="bi bi-gear me-2"></i> Settings
-                    </a>
-                    <hr class="my-1 border-gray-200 dark:border-gray-700">
-                    <form method="POST" action="{{ route('logout') }}">
-                        @csrf
-                        <button type="submit" class="w-full flex items-center px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <i class="bi bi-box-arrow-right me-2"></i> Sign Out
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-    </div> -->
+    </div>
+    @endif
 
     <!-- Navigation Menu -->
     <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-1 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600">
-        @forelse($menuItems as $item)
-            @php
-                // Check if item should be shown
-                $showItem = true;
-                if(isset($item['permission']) && $item['permission']) {
-                    $showItem = auth()->user()->can($item['permission']);
-                }
-                
-                // For debugging
-                $itemVisible = $showItem ? 'visible' : 'hidden';
-            @endphp
-            
-            @if($showItem)
-                @if(isset($item['submenu']))
-                    <!-- Menu Item with Submenu -->
-                    <div x-data="{ open: {{ request()->routeIs(collect($item['submenu'])->pluck('route')->map(fn($r) => $r . '*')->implode(' or ')) ? 'true' : 'false' }} }" class="space-y-1">
-                        <button @click="open = !open" 
-                                class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
-                                       {{ request()->routeIs(collect($item['submenu'])->pluck('route')->map(fn($r) => $r . '*')->implode(' or ')) 
-                                            ? 'bg-gradient-to-r ' . $item['color'] . ' text-white shadow-md' 
-                                            : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' }}">
-                            <span class="flex items-center">
-                                <i class="bi {{ $item['icon'] }} text-lg {{ request()->routeIs(collect($item['submenu'])->pluck('route')->map(fn($r) => $r . '*')->implode(' or ')) ? '' : 'text-gray-400' }}"></i>
-                                <span class="ml-3 font-medium">{{ $item['title'] }}</span>
-                            </span>
-                            <div class="flex items-center space-x-2">
-                                @if($item['badge'])
-                                    <span class="px-2 py-0.5 text-xs bg-white/20 text-red-500 rounded-full">{{ $item['badge'] }}</span>
-                                @endif
-                                <i class="bi bi-chevron-right text-sm transition-transform duration-200" :class="{ 'rotate-90': open }"></i>
-                            </div>
-                        </button>
-
-                        <div x-show="open" x-transition:enter="transition ease-out duration-200" 
-                             x-transition:enter-start="transform opacity-0 -translate-y-1" 
-                             x-transition:enter-end="transform opacity-100 translate-y-0"
-                             class="space-y-1 pl-4 mt-1">
-                            @foreach($item['submenu'] as $subItem)
-                                @php
-                                    $showSubItem = true;
-                                    if(isset($subItem['permission']) && $subItem['permission']) {
-                                        $showSubItem = auth()->user()->can($subItem['permission']);
-                                    }
-                                @endphp
-                                @if($showSubItem)
-                                    <a href="{{ route($subItem['route']) }}" 
-                                       class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200
-                                              {{ request()->routeIs($subItem['route']) 
-                                                   ? 'bg-gradient-to-r ' . $item['color'] . ' text-white shadow-md' 
-                                                   : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-300' }}">
-                                        <i class="bi {{ $subItem['icon'] }} text-sm"></i>
-                                        <span class="ml-3">{{ $subItem['title'] }}</span>
-                                    </a>
-                                @endif
-                            @endforeach
-                        </div>
-                    </div>
-                @else
-                    <!-- Single Menu Item -->
-                    <a href="{{ route($item['route']) }}" 
-                       class="flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
-                              {{ request()->routeIs($item['route']) 
-                                   ? 'bg-gradient-to-r ' . $item['color'] . ' text-white shadow-md' 
-                                   : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' }}">
+        @forelse($filteredMenuItems as $item)
+            @if(isset($item['submenu']) && count($item['submenu']) > 0)
+                <!-- Menu Item with Submenu -->
+                @php
+                    // Check if any submenu route matches the current route
+                    $isActive = false;
+                    foreach($item['submenu'] as $subItem) {
+                        if(request()->routeIs($subItem['route'] . '*') || request()->routeIs($subItem['route'])) {
+                            $isActive = true;
+                            break;
+                        }
+                    }
+                @endphp
+                <div x-data="{ open: {{ $isActive ? 'true' : 'false' }} }" class="space-y-1">
+                    <button @click="open = !open" 
+                            class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
+                                   {{ $isActive 
+                                        ? 'bg-gradient-to-r ' . $item['color'] . ' text-white shadow-md' 
+                                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' }}">
                         <span class="flex items-center">
-                            <i class="bi {{ $item['icon'] }} text-lg {{ request()->routeIs($item['route']) ? '' : 'text-gray-400' }}"></i>
-                            <span class="ml-3">{{ $item['title'] }}</span>
+                            <i class="bi {{ $item['icon'] }} text-lg {{ $isActive ? '' : 'text-gray-400' }}"></i>
+                            <span class="ml-3 font-medium">{{ $item['title'] }}</span>
                         </span>
-                        @if($item['badge'])
-                            <span class="px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">{{ $item['badge'] }}</span>
-                        @endif
-                    </a>
-                @endif
+                        <div class="flex items-center space-x-2">
+                            @if($item['badge'])
+                                <span class="px-2 py-0.5 text-xs bg-white/20 text-red-500 rounded-full">{{ $item['badge'] }}</span>
+                            @endif
+                            <i class="bi bi-chevron-right text-sm transition-transform duration-200" :class="{ 'rotate-90': open }"></i>
+                        </div>
+                    </button>
+
+                    <div x-show="open" x-transition:enter="transition ease-out duration-200" 
+                         x-transition:enter-start="transform opacity-0 -translate-y-1" 
+                         x-transition:enter-end="transform opacity-100 translate-y-0"
+                         class="space-y-1 pl-4 mt-1">
+                        @foreach($item['submenu'] as $subItem)
+                            @php
+                                $isSubActive = request()->routeIs($subItem['route'] . '*') || request()->routeIs($subItem['route']);
+                            @endphp
+                            <a href="{{ route($subItem['route']) }}" 
+                               class="flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-all duration-200
+                                      {{ $isSubActive 
+                                           ? 'bg-gradient-to-r ' . $item['color'] . ' text-white shadow-md' 
+                                           : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700/50 hover:text-gray-900 dark:hover:text-gray-300' }}">
+                                <i class="bi {{ $subItem['icon'] }} text-sm"></i>
+                                <span class="ml-3">{{ $subItem['title'] }}</span>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            @elseif(isset($item['route']))
+                <!-- Single Menu Item -->
+                @php
+                    $isActive = request()->routeIs($item['route']);
+                @endphp
+                <a href="{{ route($item['route']) }}" 
+                   class="flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl transition-all duration-200
+                          {{ $isActive 
+                               ? 'bg-gradient-to-r ' . $item['color'] . ' text-white shadow-md' 
+                               : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700/50' }}">
+                    <span class="flex items-center">
+                        <i class="bi {{ $item['icon'] }} text-lg {{ $isActive ? '' : 'text-gray-400' }}"></i>
+                        <span class="ml-3">{{ $item['title'] }}</span>
+                    </span>
+                    @if($item['badge'])
+                        <span class="px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">{{ $item['badge'] }}</span>
+                    @endif
+                </a>
             @endif
         @empty
             <!-- No menu items available -->
-            <div class="text-center py-4 text-gray-500 dark:text-gray-400">
-                <i class="bi bi-exclamation-circle text-2xl mb-2"></i>
-                <p class="text-sm">No menu items available</p>
+            <div class="text-center py-8 text-gray-500 dark:text-gray-400">
+                <i class="bi bi-exclamation-circle text-3xl mb-3 block"></i>
+                <p class="text-sm font-medium">No menu items available</p>
+                <p class="text-xs mt-1">Contact your administrator for access</p>
             </div>
         @endforelse
 
@@ -342,66 +388,66 @@ foreach($menuItems as $item) {
         </button>
     </div>
 
-    <!-- Mobile Search -->
-    <!-- <div class="p-4 border-b border-gray-200/80 dark:border-gray-700/80">
-        <div class="relative">
-            <i class="bi bi-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-            <input type="text" placeholder="Search..." class="w-full pl-10 pr-4 py-2.5 text-sm bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl">
-        </div>
-    </div> -->
-
     <!-- Mobile Navigation -->
     <nav class="px-3 py-4 space-y-1">
-        @foreach($menuItems as $item)
-            @php
-                $showItem = true;
-                if(isset($item['permission']) && $item['permission']) {
-                    $showItem = auth()->user()->can($item['permission']);
-                }
-            @endphp
-            @if($showItem)
-                @if(isset($item['submenu']))
-                    <div x-data="{ open: false }" class="space-y-1">
-                        <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
-                            <span class="flex items-center">
-                                <i class="bi {{ $item['icon'] }} text-lg text-gray-400"></i>
-                                <span class="ml-3">{{ $item['title'] }}</span>
-                            </span>
-                            <div class="flex items-center space-x-2">
-                                @if($item['badge'])
-                                    <span class="px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">{{ $item['badge'] }}</span>
-                                @endif
-                                <i class="bi bi-chevron-right text-sm transition-transform" :class="{ 'rotate-90': open }"></i>
-                            </div>
-                        </button>
-                        <div x-show="open" class="space-y-1 pl-4">
-                            @foreach($item['submenu'] as $subItem)
-                                @php
-                                    $showSubItem = true;
-                                    if(isset($subItem['permission']) && $subItem['permission']) {
-                                        $showSubItem = auth()->user()->can($subItem['permission']);
-                                    }
-                                @endphp
-                                @if($showSubItem)
-                                    <a href="{{ route($subItem['route']) }}" class="flex items-center px-3 py-2 text-sm rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700">
-                                        <i class="bi {{ $subItem['icon'] }} text-sm"></i>
-                                        <span class="ml-3">{{ $subItem['title'] }}</span>
-                                    </a>
-                                @endif
-                            @endforeach
-                        </div>
-                    </div>
-                @else
-                    <a href="{{ route($item['route']) }}" class="flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
+        @foreach($filteredMenuItems as $item)
+            @if(isset($item['submenu']) && count($item['submenu']) > 0)
+                @php
+                    // Check if any submenu route matches the current route
+                    $isMobileActive = false;
+                    foreach($item['submenu'] as $subItem) {
+                        if(request()->routeIs($subItem['route'] . '*') || request()->routeIs($subItem['route'])) {
+                            $isMobileActive = true;
+                            break;
+                        }
+                    }
+                @endphp
+                <div x-data="{ open: {{ $isMobileActive ? 'true' : 'false' }} }" class="space-y-1">
+                    <button @click="open = !open" class="w-full flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                         <span class="flex items-center">
                             <i class="bi {{ $item['icon'] }} text-lg text-gray-400"></i>
                             <span class="ml-3">{{ $item['title'] }}</span>
                         </span>
-                        @if($item['badge'])
-                            <span class="px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">{{ $item['badge'] }}</span>
-                        @endif
-                    </a>
-                @endif
+                        <div class="flex items-center space-x-2">
+                            @if($item['badge'])
+                                <span class="px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">{{ $item['badge'] }}</span>
+                            @endif
+                            <i class="bi bi-chevron-right text-sm transition-transform" :class="{ 'rotate-90': open }"></i>
+                        </div>
+                    </button>
+                    <div x-show="open" class="space-y-1 pl-4">
+                        @foreach($item['submenu'] as $subItem)
+                            @php
+                                $isSubActive = request()->routeIs($subItem['route'] . '*') || request()->routeIs($subItem['route']);
+                            @endphp
+                            <a href="{{ route($subItem['route']) }}" 
+                               class="flex items-center px-3 py-2 text-sm rounded-lg 
+                                      {{ $isSubActive 
+                                           ? 'bg-gradient-to-r ' . $item['color'] . ' text-white shadow-md' 
+                                           : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                                <i class="bi {{ $subItem['icon'] }} text-sm"></i>
+                                <span class="ml-3">{{ $subItem['title'] }}</span>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+            @elseif(isset($item['route']))
+                @php
+                    $isActive = request()->routeIs($item['route']);
+                @endphp
+                <a href="{{ route($item['route']) }}" 
+                   class="flex items-center justify-between px-3 py-2.5 text-sm font-medium rounded-xl
+                          {{ $isActive 
+                               ? 'bg-gradient-to-r ' . $item['color'] . ' text-white shadow-md' 
+                               : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700' }}">
+                    <span class="flex items-center">
+                        <i class="bi {{ $item['icon'] }} text-lg text-gray-400"></i>
+                        <span class="ml-3">{{ $item['title'] }}</span>
+                    </span>
+                    @if($item['badge'])
+                        <span class="px-2 py-0.5 text-xs bg-red-500 text-white rounded-full">{{ $item['badge'] }}</span>
+                    @endif
+                </a>
             @endif
         @endforeach
     </nav>
@@ -414,7 +460,7 @@ foreach($menuItems as $item) {
                  alt="">
             <div class="flex-1 min-w-0">
                 <p class="text-sm font-semibold text-gray-900 dark:text-white truncate">{{ Auth::user()->email }}</p>
-                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">{{ Auth::user()->email }}</p>
+                <p class="text-xs text-gray-500 dark:text-gray-400 truncate">Role: {{ ucfirst(Auth::user()->role ?? 'User') }}</p>
             </div>
         </div>
     </div>
