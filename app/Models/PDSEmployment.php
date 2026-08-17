@@ -20,7 +20,6 @@ class PDSEmployment extends Model
         'date_of_original_appointment',
         'date_of_last_promotion',
         'salary',
-        'salary_grade',
         'step_increment',
     ];
 
@@ -46,6 +45,11 @@ class PDSEmployment extends Model
     public function department(): BelongsTo
     {
         return $this->belongsTo(Departments::class);
+    }
+
+    public function getFormattedHireDateAttribute()
+    {
+        return $this->hired_at ? date('M d, Y', strtotime($this->hired_at)) : 'N/A';
     }
 
     // Status Helpers

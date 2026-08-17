@@ -236,9 +236,9 @@
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-200 mr-2">
                                                     {{ $doc->documentType->code ?? 'N/A' }}
                                                 </span>
-                                                <span class="text-sm text-gray-900 dark:text-gray-200">
+                                                <!-- <span class="text-sm text-gray-900 dark:text-gray-200">
                                                     {{ $doc->documentType->name ?? 'Unknown' }}
-                                                </span>
+                                                </span> -->
                                             </div>
                                         </td>
                                         <td class="px-4 py-3">
@@ -330,13 +330,13 @@
                                                         title="Delete">
                                                     <i class="bi bi-trash"></i>
                                                 </button>
-                                                @if($doc->canCreateNewVersion ?? false)
+                                                <!-- @if($doc->canCreateNewVersion ?? false)
                                                     <a href="{{ route('mydocuments.create', ['employee' => $employee, 'type' => $doc->document_type_id]) }}" 
                                                        class="inline-flex items-center p-2 bg-amber-50 hover:bg-amber-100 text-amber-600 rounded-lg transition-colors duration-200" 
                                                        title="Upload New Version">
                                                         <i class="bi bi-plus-circle"></i>
                                                     </a>
-                                                @endif
+                                                @endif -->
                                             </div>
                                             <form id="delete-form-{{ $doc->id }}" 
                                                   action="{{ route('mydocuments.destroy', ['employee' => $employee, 'document' => $doc]) }}" 

@@ -3116,7 +3116,7 @@
                                                 {{ $employment->formatted_salary }}
                                             </p>
                                             @if($employment->step_increment)
-                                                <p class="text-xs text-gray-400 dark:text-gray-500">Step: {{ $employment->step_increment }}</p>
+                                                <p class="text-xs text-gray-400 dark:text-gray-500">SG: {{ $employment->position->salary_grade }} | Step: {{ $employment->step_increment }}</p>
                                             @endif
                                         </div>
                                     </div>
@@ -3358,20 +3358,6 @@
                                                     <option value="job_order">Job Order</option>
                                                     <option value="consultant">Consultant</option>
                                                     <option value="co_term">Co-Terminus</option>
-                                                </select>
-                                            </div>
-                                            <div>
-                                                <label for="salary_grade" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                                                    <i class="bi bi-graph-up text-indigo-500 mr-1"></i>
-                                                    Salary Grade
-                                                </label>
-                                                <select id="salary_grade" 
-                                                        name="salary_grade" 
-                                                        class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200">
-                                                    <option value="">Select SG</option>
-                                                    @for($i = 1; $i <= 33; $i++)
-                                                        <option value="SG-{{ $i }}">SG-{{ $i }}</option>
-                                                    @endfor
                                                 </select>
                                             </div>
                                         </div>
@@ -4156,8 +4142,11 @@
                     </div>
 
                     <div class="p-6 space-y-8">
-                        <form id="backgroundForm" method="POST" action="{{ route('myprofile.background.store') }}">
+                        <form id="backgroundForm" method="POST" action="{{ $backgroundInfo ? route('myprofile.background.update', $backgroundInfo->id) : route('myprofile.background.store') }}">
                             @csrf
+                            @if($backgroundInfo)
+                                @method('PUT')
+                            @endif
 
                             <!-- Question 34: Relationship to Appointing Authority -->
                             <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 border border-gray-200 dark:border-gray-600">
@@ -4165,7 +4154,7 @@
                                     <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
                                         34
                                     </span>
-                                    <div class="flex-1">
+                                    <div class="flex-1 b-2">
                                         <p class="text-sm font-medium text-gray-900 dark:text-white mb-3">
                                             Are you related by consanguinity or affinity to the appointing or recommending authority, or to the chief of bureau or office or to the person who has immediate supervision over you in the Office, Bureau or Department where you will be appointed?
                                         </p>
@@ -4209,7 +4198,7 @@
                                             </div>
 
                                             <!-- 34b: Within fourth degree -->
-                                            <div class="flex items-start pt-2 border-t border-gray-200 dark:border-gray-600">
+                                            <div class="flex items-start pt-2 border-t border-gray-200 dark:border-gray-600 mt-2">
                                                 <span class="text-sm font-medium text-gray-600 dark:text-gray-400 w-6">b.</span>
                                                 <div class="flex-1">
                                                     <p class="text-sm text-gray-700 dark:text-gray-300 mb-2">Within the fourth degree (for Local Government Unit - Career Employees)?</p>
@@ -4250,7 +4239,7 @@
                             </div>
 
                             <!-- Question 35: Administrative Offense & Criminal Charges -->
-                            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 border border-gray-200 dark:border-gray-600">
+                            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 border border-gray-200 dark:border-gray-600 mt-2">
                                 <div class="flex items-start">
                                     <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
                                         35
@@ -4310,7 +4299,7 @@
                             </div>
 
                             <!-- Question 36: Conviction -->
-                            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 border border-gray-200 dark:border-gray-600">
+                            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 border border-gray-200 dark:border-gray-600 mt-2">
                                 <div class="flex items-start">
                                     <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
                                         36
@@ -4344,7 +4333,7 @@
                             </div>
 
                             <!-- Question 37: Separation from Service -->
-                            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 border border-gray-200 dark:border-gray-600">
+                            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 border border-gray-200 dark:border-gray-600 mt-2">
                                 <div class="flex items-start">
                                     <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
                                         37
@@ -4378,7 +4367,7 @@
                             </div>
 
                             <!-- Question 38: Election Candidate -->
-                            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 border border-gray-200 dark:border-gray-600">
+                            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 border border-gray-200 dark:border-gray-600 mt-2">
                                 <div class="flex items-start">
                                     <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
                                         38
@@ -4440,7 +4429,7 @@
                             </div>
 
                             <!-- Question 39: Immigrant Status -->
-                            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 border border-gray-200 dark:border-gray-600">
+                            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 border border-gray-200 dark:border-gray-600 mt-2">
                                 <div class="flex items-start">
                                     <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
                                         39
@@ -4475,7 +4464,7 @@
                             </div>
 
                             <!-- Question 40: Special Status -->
-                            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 border border-gray-200 dark:border-gray-600">
+                            <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 border border-gray-200 dark:border-gray-600 mt-2">
                                 <div class="flex items-start">
                                     <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
                                         40
@@ -4572,14 +4561,10 @@
 
                             <!-- Form Actions -->
                             <div class="flex justify-end space-x-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                <a href="{{ route('myprofile.show') }}" 
-                                class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-medium rounded-xl transition-all duration-200">
-                                    Cancel
-                                </a>
                                 <button type="submit" 
                                         class="px-6 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-105">
                                     <i class="bi bi-save mr-2"></i>
-                                    Save Background Information
+                                    {{ $backgroundInfo ? 'Update Background Information' : 'Save Background Information' }}
                                 </button>
                             </div>
                         </form>

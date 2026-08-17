@@ -26,6 +26,8 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\MyDocumentController;
 use App\Http\Controllers\DocumentManagementController;
+use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\BackgroundInfoController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -314,6 +316,16 @@ Route::middleware(['auth', 'role:admin|hr'])->group(function () {
         
         return view('errors.maintenance', compact('message', 'companyName', 'contactEmail', 'contactPhone'));
     })->name('maintenance.preview')->middleware(['auth', 'admin']);
+
+    //empolyee management routes
+    Route::prefix('employees')->name('employees.')->group(function() {
+        Route::get('/', [EmployeeController::class, 'index'])->name('index');
+        Route::post('/store', [EmployeeController::class, 'store'])->name('store');
+        Route::get('/{employee}', [EmployeeController::class, 'show'])->name('show');
+        Route::get('/{employee}/edit', [EmployeeController::class, 'edit'])->name('edit');
+        Route::put('/{employee}', [EmployeeController::class, 'update'])->name('update');
+        Route::delete('/{employee}', [EmployeeController::class, 'destroy'])->name('destroy');
+    });
 });
 
 require __DIR__.'/auth.php';

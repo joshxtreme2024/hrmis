@@ -54,6 +54,14 @@ class User extends Authenticatable
         return $this->hasOne(PDSPersonalData::class, 'user_id');
     }
 
+    public function getDisplayNameAttribute()
+    {
+        if ($this->personalData) {
+            return $this->personalData->completeName();
+        }
+        return $this->email;
+    }
+
     public function family(){
         return $this->hasOne(PDSFamilyBackground::class, 'user_id');
     }
@@ -65,12 +73,9 @@ class User extends Authenticatable
     public function education(){
         return $this->hasMany(PDSEducation::class, 'user_id');
     }
-    public function getDisplayNameAttribute()
-    {
-        if ($this->personalDataSheet) {
-            return $this->personalDataSheet->completeName();
-        }
-        return $this->name;
+
+    public function employment(){
+        return $this->hasOne(PDSEmployment::class, 'user_id');
     }
 
     public function getDisplayInitialsAttribute()

@@ -46,7 +46,6 @@ class EmploymentController extends Controller
             'date_of_original_appointment' => 'nullable|date|before_or_equal:today',
             'date_of_last_promotion' => 'nullable|date|after:date_of_original_appointment|before_or_equal:today',
             'salary' => 'nullable|numeric|min:0',
-            'salary_grade' => 'nullable|string|max:10',
             'step_increment' => 'nullable|integer|min:1|max:8',
         ]);
 
@@ -80,7 +79,6 @@ class EmploymentController extends Controller
             'date_of_original_appointment' => 'nullable|date|before_or_equal:today',
             'date_of_last_promotion' => 'nullable|date|after:date_of_original_appointment|before_or_equal:today',
             'salary' => 'nullable|numeric|min:0',
-            'salary_grade' => 'nullable|string|max:10',
             'step_increment' => 'nullable|integer|min:1|max:8',
         ]);
 

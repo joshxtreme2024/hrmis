@@ -77,8 +77,7 @@ class BackgroundInfoController extends Controller
             'q40_c' => $request->q40_c,
         ]);
 
-        return redirect()->route('background.show', $backgroundInfo->id)
-            ->with('success', 'Background information saved successfully.');
+        return redirect()->back()->with('success', 'Background information saved successfully.');
     }
 
     /**
@@ -154,8 +153,7 @@ class BackgroundInfoController extends Controller
             'q40_c' => $request->q40_c,
         ]);
 
-        return redirect()->route('background.show', $backgroundInfo->id)
-            ->with('success', 'Background information updated successfully.');
+        return redirect()->back()->with('success', 'Background information updated successfully.');
     }
 
     /**
