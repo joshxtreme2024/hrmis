@@ -40,12 +40,6 @@ class VoluntaryWorkController extends Controller
             'position_nature_of_work' => 'required|string|max:255',
         ]);
 
-        // ✅ If inclusive_to is null or empty, set it to inclusive_from
-        // This prevents database error if column is NOT NULL
-        if (empty($validated['inclusive_to'])) {
-            $validated['inclusive_to'] = $validated['inclusive_from'];
-        }
-
         $validated['user_id'] = Auth::id();
         if (!isset($validated['order'])) {
             $validated['order'] = 0;
@@ -77,10 +71,6 @@ class VoluntaryWorkController extends Controller
             'position_nature_of_work' => 'required|string|max:255',
         ]);
 
-        // ✅ If inclusive_to is null or empty, set it to inclusive_from
-        if (empty($validated['inclusive_to'])) {
-            $validated['inclusive_to'] = $validated['inclusive_from'];
-        }
         if (!isset($validated['order'])) {
             $validated['order'] = 0;
         }

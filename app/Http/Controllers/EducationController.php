@@ -15,6 +15,7 @@ class EducationController extends Controller
             
             return response()->json([
                 'id' => $education->id,
+                'order' => $education->order,
                 'level' => $education->level,
                 'school_name' => $education->school_name,
                 'school_address' => $education->school_address,
@@ -33,19 +34,20 @@ class EducationController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
+            'order' => 'nullable|integer|min:0',
             'level' => 'required|string|max:60',
             'school_name' => 'required|string|max:255',
             'school_address' => 'nullable|string|max:255',
             'degree_course' => 'nullable|string|max:255',
             'period_from' => 'required|integer|min:1950|max:' . date('Y'),
-            'period_to' => 'required|integer|min:1950|max:' . date('Y'),
+            'period_to' => 'nullable|integer|min:1950|max:' . date('Y'),
             'highest_level_earned' => 'nullable|string|max:255',
-            'year_graduated' => 'required|integer|min:1950|max:' . date('Y'),
+            'year_graduated' => 'nullable|integer|min:1950|max:' . date('Y'),
             'scholarship_honors' => 'nullable|string|max:255',
         ]);
 
         $validated['user_id'] = Auth::id();
-        
+        $validated['order'] = $validated['order'] ?: 0;
         $education = PDSEducation::create($validated);
 
         if ($request->ajax()) {
@@ -64,17 +66,19 @@ class EducationController extends Controller
         $education = PDSEducation::where('user_id', Auth::id())->findOrFail($id);
 
         $validated = $request->validate([
+            'order' => 'nullable|integer|min:0',
             'level' => 'required|string|max:60',
             'school_name' => 'required|string|max:255',
             'school_address' => 'nullable|string|max:255',
             'degree_course' => 'nullable|string|max:255',
             'period_from' => 'required|integer|min:1950|max:' . date('Y'),
-            'period_to' => 'required|integer|min:1950|max:' . date('Y'),
+            'period_to' => 'nullable|integer|min:1950|max:' . date('Y'),
             'highest_level_earned' => 'nullable|string|max:255',
-            'year_graduated' => 'required|integer|min:1950|max:' . date('Y'),
+            'year_graduated' => 'nullable|integer|min:1950|max:' . date('Y'),
             'scholarship_honors' => 'nullable|string|max:255',
         ]);
 
+        $validated['order'] = $validated['order'] ?: 0;
         $education->update($validated);
 
         if ($request->ajax()) {

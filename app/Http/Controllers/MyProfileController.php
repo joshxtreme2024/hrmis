@@ -43,7 +43,7 @@ class MyProfileController extends Controller
         $governmentIds = PDSGovernmentId::where('user_id', $userId)->first();
         $familyBackground = PDSFamilyBackground::where('user_id', $userId)->first();
         $children = PDSChildren::where('user_id', $userId)->get();
-        $education = PDSEducation::where('user_id', $userId)->get();
+        $education = PDSEducation::where('user_id', $userId)->orderBy('order', 'ASC')->get();
         $workExperiences = PDSWorkExperience::where('user_id', $userId)->orderBy('order', 'ASC')->get();
         $employment = PDSEmployment::where('user_id', $userId)->first();
         $trainings = PDSTraining::where('user_id', $userId)->orderBy('order', 'ASC')->get();

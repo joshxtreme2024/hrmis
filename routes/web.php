@@ -22,12 +22,12 @@ use App\Http\Controllers\ReferenceController;
 use App\Http\Controllers\EmploymentController;
 use App\Http\Controllers\GovernmentIdController;
 use App\Http\Controllers\AddressController;
-use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\MyDocumentController;
 use App\Http\Controllers\DocumentManagementController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\BackgroundInfoController;
+use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
     return view('welcome');
@@ -61,7 +61,44 @@ Route::middleware(['auth'])->group(function () {
     })->name('maintenance.preview');
 });
 
-Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
+Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+
+Route::middleware(['auth', 'role:hr,admin'])->prefix('hr')->name('hr.')->group(function () {
+    // HR Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'hrDashboard'])->name('dashboard');
+    
+    // HR Employee Management
+    Route::resource('employees', EmployeeController::class);
+    // ... other HR routes
+    Route::get('/leaves/create', [LeaveController::class, 'create'])->name('leaves.create');
+    Route::get('/leaves/pending', [LeaveController::class, 'create'])->name('leaves.pending');
+    Route::get('/employees/search', [LeaveController::class, 'index'])->name('employees.search');
+    Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+    Route::get('/reports', [AttendanceController::class, 'reports'])->name('reports.index');
+});
+
+// ==================== Employee Routes ====================
+Route::middleware(['auth', 'role:employee'])->prefix('employee')->name('employee.')->group(function () {
+    // Employee Dashboard
+    Route::get('/dashboard', [DashboardController::class, 'employeeDashboard'])->name('dashboard');
+    
+    // Employee Profile
+    Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
+    Route::get('/profile/pds', [ProfileController::class, 'show'])->name('pds.show');
+    Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    
+    // Employee Leaves
+    Route::get('/leaves', [LeaveController::class, 'index'])->name('leaves.index');
+    Route::get('/leaves/create', [LeaveController::class, 'create'])->name('leaves.create');
+    Route::post('/leaves', [LeaveController::class, 'store'])->name('leaves.store');
+    Route::get('/leaves/history', [LeaveController::class, 'history'])->name('leaves.history');
+    
+    // Employee Attendance
+    Route::get('/attendance', [AttendanceController::class, 'index'])->name('attendance.index');
+    Route::get('/attendance/history', [AttendanceController::class, 'history'])->name('attendance.history');
+});
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile/update', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -148,6 +185,24 @@ Route::middleware('auth')->group(function () {
         Route::put('/employment/{id}', [EmploymentController::class, 'update'])->name('employment.update');
     });
 
+    //governement ids
+    Route::get('/myprofile/government-id/{id}/edit-data', [GovernmentIdController::class, 'getEditData'])->name('myprofile.government-id.getData');
+    Route::post('/myprofile/government-id', [GovernmentIdController::class, 'store'])->name('myprofile.government-id.store');
+    Route::put('/myprofile/government-id/{id}', [GovernmentIdController::class, 'update'])->name('myprofile.government-id.update');
+
+    //address
+    Route::get('/myprofile/address/{id}/edit-data', [AddressController::class, 'getEditData'])->name('myprofile.address.getData');
+    Route::post('/myprofile/address', [AddressController::class, 'store'])->name('myprofile.address.store');
+    Route::put('/myprofile/address/{id}', [AddressController::class, 'update'])->name('myprofile.address.update');
+    Route::delete('/myprofile/address/{id}', [AddressController::class, 'destroy'])->name('myprofile.address.destroy');
+    Route::patch('/myprofile/address/toggle-permanent/{id}', [AddressController::class, 'togglePermanent'])->name('myprofile.address.toggle-permanent');
+    
+    //recruitment
+    Route::get('/recruitment/jobs', [SettingsController::class, 'index'])->name('recruitment.jobs');
+    Route::get('/recruitment/applications', [SettingsController::class, 'index'])->name('recruitment.applications');
+    Route::get('/recruitment/candidates', [SettingsController::class, 'index'])->name('recruitment.candidates');
+    Route::get('/recruitment/interviews', [SettingsController::class, 'index'])->name('recruitment.interviews');
+
     //backgroudn iformations
     Route::get('/background', [BackgroundInfoController::class, 'index'])->name('myprofile.background.index');
     Route::get('/background/create', [BackgroundInfoController::class, 'create'])->name('myprofile.background.create');
@@ -197,11 +252,28 @@ Route::middleware('auth')->group(function () {
     Route::get('/payroll/benefits', [SettingsController::class, 'index'])->name('reports.index');
 
     Route::resource('pds', PersonalDataSheetsController::class);
+
+    //employee documents  management routes
+    Route::get('employee/documents', [DocumentManagementController::class, 'index'])->name('employee.documents.index');
+    Route::get('employee/documents/{document}/edit', [DocumentManagementController::class, 'edit'])->name('employee.documents.edit');
+    Route::put('employee/documents/{document}', [DocumentManagementController::class, 'update'])->name('employee.documents.update');
+    Route::post('employee/documents/{document}/approve', [DocumentManagementController::class, 'approve'])->name('employee.documents.approve');
+    Route::post('employee/documents/{document}/reject', [DocumentManagementController::class, 'reject'])->name('employee.documents.reject');
+    Route::delete('employee/documents/{document}', [DocumentManagementController::class, 'destroy'])->name('employee.documents.destroy');
+    Route::get('employee/documents/{document}/download', [DocumentManagementController::class, 'download'])->name('employee.documents.download');
+    Route::get('employee/documents/export', [DocumentManagementController::class, 'export'])->name('employee.documents.export');
+    Route::get('employee/documents/report', [DocumentManagementController::class, 'report'])->name('employee.documents.report');
+    Route::get('employee/{document}/preview', [DocumentManagementController::class, 'preview'])->name('employee.documents.preview');
+    Route::get('employee/documents/stream/{document}', [DocumentManagementController::class, 'stream'])
+    ->name('employee.documents.stream');
 });
 
 Route::middleware(['auth', 'role:admin|hr'])->group(function () {
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
     Route::get('/settings/roles', [SettingsController::class, 'roles'])->name('settings.roles');
+    
+    //payroll
+    Route::get('/payroll/benefits', [SettingsController::class, 'index'])->name('payroll.benefits');
 
     Route::resource('/settings/users', UsersController::class);
     Route::post('/users/{user}/enable', [UsersController::class, 'enable'])->name('users.enable');
@@ -228,26 +300,6 @@ Route::middleware(['auth', 'role:admin|hr'])->group(function () {
     Route::put('/settings', [SettingsController::class, 'update'])->name('settings.update');
     Route::post('/settings/test-email', [SettingsController::class, 'testEmail'])->name('settings.test-email');
 
-    //governement ids
-    Route::get('/myprofile/government-id/{id}/edit-data', [GovernmentIdController::class, 'getEditData'])->name('myprofile.government-id.getData');
-    Route::post('/myprofile/government-id', [GovernmentIdController::class, 'store'])->name('myprofile.government-id.store');
-    Route::put('/myprofile/government-id/{id}', [GovernmentIdController::class, 'update'])->name('myprofile.government-id.update');
-
-    //address
-    Route::get('/myprofile/address/{id}/edit-data', [AddressController::class, 'getEditData'])->name('myprofile.address.getData');
-    Route::post('/myprofile/address', [AddressController::class, 'store'])->name('myprofile.address.store');
-    Route::put('/myprofile/address/{id}', [AddressController::class, 'update'])->name('myprofile.address.update');
-    Route::delete('/myprofile/address/{id}', [AddressController::class, 'destroy'])->name('myprofile.address.destroy');
-
-    //payroll
-    Route::get('/payroll/benefits', [SettingsController::class, 'index'])->name('payroll.benefits');
-    
-    //recruitment
-    Route::get('/recruitment/jobs', [SettingsController::class, 'index'])->name('recruitment.jobs');
-    Route::get('/recruitment/applications', [SettingsController::class, 'index'])->name('recruitment.applications');
-    Route::get('/recruitment/candidates', [SettingsController::class, 'index'])->name('recruitment.candidates');
-    Route::get('/recruitment/interviews', [SettingsController::class, 'index'])->name('recruitment.interviews');
-
     //performance
     Route::get('/performance/reviews', [SettingsController::class, 'index'])->name('performance.reviews');
     Route::get('/performance/goals', [SettingsController::class, 'index'])->name('performance.goals');
@@ -260,20 +312,6 @@ Route::middleware(['auth', 'role:admin|hr'])->group(function () {
 
     //reports
     Route::get('/reports/attendance', [SettingsController::class, 'index'])->name('reports.index');
-
-    //employee documents  management routes
-    Route::get('employee/documents', [DocumentManagementController::class, 'index'])->name('employee.documents.index');
-    Route::get('employee/documents/{document}/edit', [DocumentManagementController::class, 'edit'])->name('employee.documents.edit');
-    Route::put('employee/documents/{document}', [DocumentManagementController::class, 'update'])->name('employee.documents.update');
-    Route::post('employee/documents/{document}/approve', [DocumentManagementController::class, 'approve'])->name('employee.documents.approve');
-    Route::post('employee/documents/{document}/reject', [DocumentManagementController::class, 'reject'])->name('employee.documents.reject');
-    Route::delete('employee/documents/{document}', [DocumentManagementController::class, 'destroy'])->name('employee.documents.destroy');
-    Route::get('employee/documents/{document}/download', [DocumentManagementController::class, 'download'])->name('employee.documents.download');
-    Route::get('employee/documents/export', [DocumentManagementController::class, 'export'])->name('employee.documents.export');
-    Route::get('employee/documents/report', [DocumentManagementController::class, 'report'])->name('employee.documents.report');
-    Route::get('employee/{document}/preview', [DocumentManagementController::class, 'preview'])->name('employee.documents.preview');
-    Route::get('employee/documents/stream/{document}', [DocumentManagementController::class, 'stream'])
-    ->name('employee.documents.stream');
 
     Route::post('documents/bulk-approve', [DocumentManagementController::class, 'bulkApprove'])->name('employee.documents.bulk-approve');
     Route::post('documents/bulk-reject', [DocumentManagementController::class, 'bulkReject'])->name('employee.documents.bulk-reject');
@@ -325,6 +363,11 @@ Route::middleware(['auth', 'role:admin|hr'])->group(function () {
         Route::get('/{employee}/edit', [EmployeeController::class, 'edit'])->name('edit');
         Route::put('/{employee}', [EmployeeController::class, 'update'])->name('update');
         Route::delete('/{employee}', [EmployeeController::class, 'destroy'])->name('destroy');
+        Route::get('/{employee}/profile', [EmployeeController::class, 'showProfile'])->name('showProfile');
+        Route::post('/{employee}/terminate', [EmployeeController::class, 'terminate'])->name('terminate');
+        Route::patch('/{employee}/cancel-termination', [EmployeeController::class, 'canceltTermination'])->name('termination.cancel');
+        Route::post('/{employee}/promote', [EmployeeController::class, 'showProfile'])->name('promote');
+        Route::post('/{employee}/leave', [EmployeeController::class, 'showProfile'])->name('leave');
     });
 });
 

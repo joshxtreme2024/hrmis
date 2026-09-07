@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\PDSEmployment;
 use App\Models\Departments;
 use App\Models\Positions;
+use App\Models\TerminationDetail;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
@@ -62,7 +63,8 @@ class EmployeeController extends Controller
             });
         }
 
-        $employees = $query->orderBy('created_at', 'desc')->paginate(20);
+        $employees = $query->where('id', '!=', auth()->id())
+                        ->orderBy('created_at', 'desc')->paginate(20);
 
         // Statistics
         $stats = [
@@ -361,5 +363,69 @@ class EmployeeController extends Controller
                 'message' => 'Failed to perform bulk action: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    public function showProfile(User $employee)
+    {
+        $employee->load(['personalData', 'employment', 'employment.department', 'employment.position', 'governmentID']);
+        
+        $sensitiveData = [
+            'gsis_number' => $employee->governmentID?->gsis_number,
+            'umid_number' => $employee->governmentID?->umid_number,
+            'sss_number' => $employee->governmentID?->sss_number,
+            'pagibig_number' => $employee->governmentID?->pagibig_number,
+            'philhealth_number' => $employee->governmentID?->philhealth_number,
+            'tin_number' => $employee->governmentID?->tin_number,
+            'philsys_number' => $employee->governmentID?->philsys_number,
+            'dl_number' => $employee->governmentID?->dl_number,
+            'passport_number' => $employee->governmentID?->passport_number,
+            'prc_number' => $employee->governmentID?->prc_number,
+        ];
+        
+        $positions = Positions::all();
+        
+        return view('management.employees.show', compact('employee', 'sensitiveData', 'positions'));
+    }
+
+    public function terminate(Request $request, User $employee)
+    {
+        $validated = $request->validate([
+            'termination_date' => 'required|date',
+            'termination_reason' => 'required|string|max:255',
+            'termination_details' => 'nullable|string',
+        ]);
+        
+        $hasRecord = $employee->employment()->exists();
+        if (!$hasRecord) {
+            return redirect()->back()->with('error', 'Termination cancelled. No employment record found.');
+        }
+        
+        $terminate = $employee->employment()->update([
+            'status' => 'terminated',
+        ]);
+
+        if($terminate){
+            TerminationDetail::create([
+                'user_id' => $employee->id,
+                'termination_date' => $validated['termination_date'],
+                'termination_reason' => $validated['termination_reason'],
+                'remarks' => $validated['termination_details'] ?? null,
+                'created_by' => auth()->id(),
+            ]);
+        }
+        
+        return redirect()->route('employees.showProfile', $employee)
+            ->with('success', 'Employee terminated successfully.');
+    }
+
+    public function canceltTermination(Request $request, User $employee)
+    {
+        
+        $terminate = $employee->employment()->update([
+            'status' => 'active',
+        ]);
+        
+        return redirect()->route('employees.showProfile', $employee)
+            ->with('success', 'Employee activated successfully.');
     }
 }

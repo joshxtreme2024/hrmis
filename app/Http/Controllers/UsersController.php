@@ -92,7 +92,7 @@ class UsersController extends Controller
     public function changeRole(Request $request, User $user)
     {
         $request->validate([
-            'role' => 'required|in:admin,hr_manager,employee','finance',
+            'role' => 'required|in:admin,hr,employee','finance',
             'confirm' => 'accepted',
         ]);
 

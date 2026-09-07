@@ -18,6 +18,7 @@ class PDSAddress extends Model
         'city_municipality',
         'province',
         'zip_code',
+        'is_permanent',
     ];
 
     public function user()
@@ -40,7 +41,7 @@ class PDSAddress extends Model
             $parts[] = $this->subdi_village;
         }
         if ($this->barangay) {
-            $parts[] = 'Brgy. ' . $this->barangay;
+            $parts[] = $this->barangay;
         }
         if ($this->city_municipality) {
             $parts[] = $this->city_municipality;

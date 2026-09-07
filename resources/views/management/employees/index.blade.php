@@ -1,7 +1,12 @@
-{{-- resources/views/management/employees/index.blade.php --}}
 @extends('layouts.app')
 
 @section('title', 'Employee Management')
+@section('breadcrumbs')
+    <li class="flex items-center">
+        <i class="bi bi-chevron-right text-gray-300 dark:text-gray-600 mx-2 text-xs"></i>
+        <span class="text-gray-800 dark:text-gray-200 font-medium">Employee Management</span>
+    </li>
+@endsection
 
 @section('page-header')
     <div class="flex items-center justify-between py-4 px-6 bg-white border-b border-gray-200">
@@ -157,14 +162,12 @@
                         {{ $employees->total() ?? 0 }} Employees
                     </span>
                     <div class="relative inline-block">
-                        <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded-lg text-sm flex items-center gap-1 transition-colors" 
-                                data-bs-toggle="dropdown">
+                        <button class="dropdown-trigger bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded-lg text-sm flex items-center gap-1 transition-colors">
                             <i class="fas fa-file-export"></i>
                             <span>Export</span>
                             <i class="fas fa-chevron-down text-xs"></i>
                         </button>
-                        <ul class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10 hidden" 
-                            data-bs-toggle="dropdown">
+                        <ul class="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10 hidden">
                             <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" href="#"><i class="fas fa-file-pdf mr-2"></i>PDF</a></li>
                             <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" href="#"><i class="fas fa-file-excel mr-2"></i>Excel</a></li>
                             <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" href="#"><i class="fas fa-file-csv mr-2"></i>CSV</a></li>
@@ -184,7 +187,7 @@
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Hired</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-200">
@@ -213,11 +216,13 @@
                                             @endif
                                         </div>
                                         <div>
-                                            <div class="font-medium text-gray-900">{{ $employee->display_name }}</div>
-                                            <div class="text-sm text-gray-500">{{ $employee->email }}</div>
-                                            @if($employee->employment?->employee_id)
-                                                <div class="text-xs text-gray-400">ID: {{ $employee->employment->employee_id }}</div>
-                                            @endif
+                                            <a href="{{ route('employees.showProfile', $employee) }}">
+                                                <div class="font-medium text-gray-900">{{ $employee->display_name }}</div>
+                                                <div class="text-sm text-gray-500">{{ $employee->email }}</div>
+                                                @if($employee->employment?->employee_id)
+                                                    <div class="text-xs text-gray-400">ID: {{ $employee->employment->employee_id }}</div>
+                                                @endif
+                                            </a>
                                         </div>
                                     </div>
                                 </td>
@@ -239,54 +244,37 @@
                                 </td>
                                 <td class="px-4 py-3">
                                     <div class="flex items-center gap-1">
-                                        <button class="p-1.5 text-blue-600 hover:bg-blue-100 rounded-lg transition-colors view-employee" 
-                                                data-id="{{ $employee->id }}"
-                                                data-bs-toggle="tooltip" title="View Profile">
-                                            <i class="fas fa-eye"></i>
-                                        </button>
-                                        <button class="p-1.5 text-yellow-600 hover:bg-yellow-100 rounded-lg transition-colors edit-employee" 
-                                                data-id="{{ $employee->id }}"
-                                                data-bs-toggle="tooltip" title="Edit">
-                                            <i class="fas fa-edit"></i>
-                                        </button>
-                                        <button class="p-1.5 text-red-600 hover:bg-red-100 rounded-lg transition-colors delete-employee" 
-                                                data-id="{{ $employee->id }}"
-                                                data-name="{{ $employee->first_name }} {{ $employee->last_name }}"
-                                                data-bs-toggle="tooltip" title="Delete">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
                                         <div class="relative inline-block">
-                                            <button class="p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors" 
-                                                    data-bs-toggle="dropdown">
+                                            <button class="dropdown-trigger p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
                                                 <i class="fas fa-ellipsis-v"></i>
                                             </button>
-                                            <ul class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10 hidden" 
-                                                data-bs-toggle="dropdown">
-                                                <li>
-                                                    <a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" href="#">
-                                                        <i class="fas fa-file-contract mr-2"></i>View Contract
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" href="#">
-                                                        <i class="fas fa-clock mr-2"></i>Attendance
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" href="#">
-                                                        <i class="fas fa-calendar-alt mr-2"></i>Leave History
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" href="#">
-                                                        <i class="fas fa-tasks mr-2"></i>Performance
-                                                    </a>
-                                                </li>
+                                            <ul class="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10 hidden">
+                                                <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" href="{{ route('employees.showProfile', $employee) }}"><i class="fa-solid fa-user mr-2"></i>View Profile</a></li>
+                                                <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" href="{{ route('dashboard') }}"><i class="fas fa-file-contract mr-2"></i>View Contract</a></li>
+                                                <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" href="#"><i class="fas fa-clock mr-2"></i>Attendance</a></li>
+                                                <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" href="#"><i class="fas fa-calendar-alt mr-2"></i>Leave History</a></li>
+                                                <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" href="#"><i class="fas fa-tasks mr-2"></i>Performance</a></li>
                                                 <li><hr class="my-1 border-gray-200"></li>
                                                 <li>
-                                                    <a class="block px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors" href="#">
-                                                        <i class="fas fa-user-slash mr-2"></i>Terminate
-                                                    </a>
+                                                    @if($employee->employment?->status != 'terminated')
+                                                        <button type="button" 
+                                                                onclick="event.stopPropagation(); openTerminateModal({{ $employee->id }}, '{{ addslashes($employee->display_name) }}')"
+                                                                class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center">
+                                                            <i class="bi bi-person-x mr-2"></i>
+                                                            Terminate Employee
+                                                        </button>
+                                                    @else
+                                                        <form action="{{ route('employees.termination.cancel', $employee) }}" method="POST">
+                                                            @csrf
+                                                            @method('PATCH')
+                                                            <button type="submit" 
+                                                                    onclick="return confirm('⚠️ Are you sure you want to reactivate employment status?\n\nThis action will:\n• Reactivate the employee account\n• Update employment status to active')"
+                                                                    class="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-50 transition-colors flex items-center">
+                                                                <i class="bi bi-arrow-counterclockwise mr-2"></i>
+                                                                Reactivate Employment
+                                                            </button>
+                                                        </form>
+                                                    @endif
                                                 </li>
                                             </ul>
                                         </div>
@@ -316,21 +304,92 @@
             </div>
         </div>
     </div>
+
+    <!-- Terminate Modal - Moved OUTSIDE the table -->
+    <div id="terminateModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <form action="" method="POST" id="terminateForm">
+                @csrf
+                <div class="px-6 py-5 border-b border-gray-100">
+                    <div class="flex items-center justify-between">
+                        <h5 class="text-red-600 text-xl font-bold">
+                            <i class="bi bi-exclamation-triangle mr-2"></i>
+                            Terminate Employee
+                        </h5>
+                        <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors text-2xl leading-none" onclick="closeTerminateModal()">
+                            ×
+                        </button>
+                    </div>
+                </div>
+                <div class="px-6 py-4">
+                    <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
+                        <div class="flex items-start">
+                            <i class="bi bi-info-circle text-red-500 mr-2 mt-0.5"></i>
+                            <div>
+                                <p class="text-sm text-red-800 font-medium">
+                                    <strong>Warning:</strong> You are about to terminate <strong id="employeeNameDisplay"></strong>.
+                                </p>
+                                <p class="text-xs text-red-600 mt-1">This action will permanently deactivate their account and remove access to the system.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Termination Date <span class="text-red-500">*</span></label>
+                            <input type="date" name="termination_date" id="termination_date" 
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200" 
+                                required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Reason for Termination <span class="text-red-500">*</span></label>
+                            <select name="termination_reason" id="termination_reason" 
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200" 
+                                    required>
+                                <option value="">Select reason...</option>
+                                <option value="resignation">Resignation</option>
+                                <option value="retirement">Retirement</option>
+                                <option value="death">Death</option>
+                                <option value="dismissal">Dismissal</option>
+                                <option value="drop_from_roll">Drop From the Roll</option>
+                                <option value="end_of_term">End of Term</option>
+                                <option value="laid_off">Laid Off</option>
+                                <option value="separation">Separation</option>
+                                <option value="termination">Termination</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Additional Details</label>
+                            <textarea name="termination_details" id="termination_details" rows="3" 
+                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200"
+                                    placeholder="Provide additional details about the termination..."></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="px-6 py-5 border-t border-gray-100 flex justify-end gap-3">
+                    <button type="button" class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all duration-200" onclick="closeTerminateModal()">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all duration-200 hover:shadow-lg">
+                        <i class="bi bi-person-x mr-2"></i>
+                        Terminate Employee
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 @endsection
 
 @push('styles')
 <style>
-    /* Custom styles for status badges */
     .badge {
         @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
     }
     
-    /* Hover effect for table rows */
     .hover\:bg-blue-50:hover {
         background-color: #eff6ff;
     }
     
-    /* Custom scrollbar for table */
     .overflow-x-auto::-webkit-scrollbar {
         height: 6px;
     }
@@ -353,93 +412,145 @@
 
 @push('scripts')
 <script>
-$(document).ready(function() {
-    // Initialize tooltips
-    $('[data-bs-toggle="tooltip"]').tooltip();
-
-    // Select All functionality
-    $('#selectAll').change(function() {
-        $('.employee-checkbox').prop('checked', $(this).prop('checked'));
-    });
-
-    // Reset filters
-    $('#resetFilters').click(function() {
-        $('#searchEmployee').val('');
-        $('#filterDepartment').val('');
-        $('#filterStatus').val('');
-        $('#filterPosition').val('');
-        $('#employeeFilterForm').submit();
-    });
-
-    // View Employee - using Bootstrap 5 modal
-    $('.view-employee').click(function() {
-        const id = $(this).data('id');
-        const modal = new bootstrap.Modal(document.getElementById('viewEmployeeModal'));
-        
-        // Load employee data via AJAX
-        $.ajax({
-            url: `/management/employees/${id}/details`,
-            type: 'GET',
-            success: function(response) {
-                // Populate view modal with data
-                modal.show();
-            },
-            error: function() {
-                if (typeof toastr !== 'undefined') {
-                    toastr.error('Failed to load employee details');
-                }
+// Wait for DOM to be fully loaded
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('DOM loaded - setting up dropdowns');
+    
+    // Dropdown functionality
+    document.querySelectorAll('.dropdown-trigger').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            const dropdown = this.nextElementSibling;
+            const isHidden = dropdown.classList.contains('hidden');
+            
+            // Close all other open dropdowns
+            document.querySelectorAll('.dropdown-menu').forEach(d => {
+                if (d !== dropdown) d.classList.add('hidden');
+            });
+            
+            // Toggle this dropdown
+            if (isHidden) {
+                dropdown.classList.remove('hidden');
+            } else {
+                dropdown.classList.add('hidden');
             }
         });
     });
 
-    // Edit Employee
-    $('.edit-employee').click(function() {
-        const id = $(this).data('id');
-        const modal = new bootstrap.Modal(document.getElementById('editEmployeeModal'));
-        
-        // Load employee data for editing
-        $.ajax({
-            url: `/management/employees/${id}/edit`,
-            type: 'GET',
-            success: function(response) {
-                // Populate edit modal with data
-                modal.show();
-            },
-            error: function() {
-                if (typeof toastr !== 'undefined') {
-                    toastr.error('Failed to load employee data for editing');
-                }
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        document.querySelectorAll('.dropdown-menu').forEach(dropdown => {
+            if (!dropdown.classList.contains('hidden') && !dropdown.closest('.relative').contains(e.target)) {
+                dropdown.classList.add('hidden');
             }
         });
     });
 
-    // Delete Employee
-    $('.delete-employee').click(function() {
-        const id = $(this).data('id');
-        const name = $(this).data('name');
-        $('#deleteEmployeeName').text(name);
-        $('#deleteEmployeeId').val(id);
-        
-        const modal = new bootstrap.Modal(document.getElementById('deleteEmployeeModal'));
-        modal.show();
-    });
+    // Select All checkbox
+    const selectAll = document.getElementById('selectAll');
+    if (selectAll) {
+        selectAll.addEventListener('change', function() {
+            document.querySelectorAll('.employee-checkbox').forEach(cb => {
+                cb.checked = this.checked;
+            });
+        });
+    }
 
-    // Filter form submission
-    $('#employeeFilterForm').submit(function(e) {
-        e.preventDefault();
-        const search = $('#searchEmployee').val();
-        const department = $('#filterDepartment').val();
-        const status = $('#filterStatus').val();
-        const position = $('#filterPosition').val();
-        
-        let url = '{{ route("employees.index") }}?';
-        if (search) url += `search=${search}&`;
-        if (department) url += `department=${department}&`;
-        if (status) url += `status=${status}&`;
-        if (position) url += `position=${position}&`;
-        
-        window.location.href = url;
-    });
+    // Confirm before termination - Attach to form
+    const terminateForm = document.getElementById('terminateForm');
+    if (terminateForm) {
+        terminateForm.addEventListener('submit', function(e) {
+            if (!confirm('⚠️ Are you sure you want to terminate this employee? This action cannot be undone.')) {
+                e.preventDefault();
+                return false;
+            }
+        });
+    }
 });
+
+// Global functions for modal - Make them truly global
+window.openTerminateModal = function(employeeId, employeeName) {
+    console.log('Opening modal for:', employeeId, employeeName);
+    
+    const modal = document.getElementById('terminateModal');
+    if (!modal) {
+        console.error('Modal not found!');
+        alert('Modal not found! Please check the page.');
+        return;
+    }
+    
+    // Close all dropdowns first
+    document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.add('hidden'));
+    
+    // Set employee name
+    const nameDisplay = document.getElementById('employeeNameDisplay');
+    if (nameDisplay) {
+        nameDisplay.textContent = employeeName;
+    }
+    
+    // Set form action
+    const form = document.getElementById('terminateForm');
+    if (form) {
+        form.action = 'employees/' + employeeId + '/terminate';
+        console.log('Form action set to:', form.action);
+    }
+    
+    // Reset form
+    const dateInput = document.getElementById('termination_date');
+    const reasonSelect = document.getElementById('termination_reason');
+    const detailsTextarea = document.getElementById('termination_details');
+    
+    if (dateInput) dateInput.value = '';
+    if (reasonSelect) reasonSelect.value = '';
+    if (detailsTextarea) detailsTextarea.value = '';
+    
+    // Show modal
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+    
+    console.log('Modal should now be visible');
+};
+
+window.closeTerminateModal = function() {
+    console.log('Closing modal');
+    const modal = document.getElementById('terminateModal');
+    if (modal) {
+        modal.classList.add('hidden');
+        modal.classList.remove('flex');
+        document.body.style.overflow = '';
+    }
+};
+
+// Close modal when clicking outside
+document.addEventListener('click', function(event) {
+    const modal = document.getElementById('terminateModal');
+    if (modal && !modal.classList.contains('hidden')) {
+        const modalContent = modal.querySelector('.bg-white');
+        if (modalContent && !modalContent.contains(event.target)) {
+            window.closeTerminateModal();
+        }
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        // Close dropdowns
+        document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.add('hidden'));
+        // Close modal
+        window.closeTerminateModal();
+    }
+});
+
+// jQuery for backward compatibility (if jQuery is loaded)
+if (typeof $ !== 'undefined') {
+    $(document).ready(function() {
+        $('#selectAll').change(function() {
+            $('.employee-checkbox').prop('checked', $(this).prop('checked'));
+        });
+    });
+}
 </script>
 @endpush

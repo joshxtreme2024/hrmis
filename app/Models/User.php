@@ -50,8 +50,73 @@ class User extends Authenticatable
         ];
     }
 
+    public function terminationDetail(){
+        return $this->hasMany(TerminationDetail::class, 'user_id')->orderBy('id', 'desc');
+    }
+
+    public function latestTermination()
+    {
+        return $this->hasOne(TerminationDetail::class, 'user_id')->latest();
+    }
+
+    public function workExperiences(){
+        return $this->hasMany(PDSWorkExperience::class, 'user_id');
+    }
+    
+    public function references(){
+        return $this->hasMany(PDSReference::class, 'user_id');
+    }
+    
+    public function trainings(){
+        return $this->hasMany(PDSTraining::class, 'user_id');
+    }
+    
+    public function distinctions(){
+        return $this->hasMany(PDSDistinction::class, 'user_id');
+    }
+
+    public function skills(){
+        return $this->hasMany(PDSSkill::class, 'user_id');
+    }
+    
+    public function backgroundInfo(){
+        return $this->hasOne(PDSBackgroundInfo::class, 'user_id');
+    }
+
+    public function organizations(){
+        return $this->hasMany(PDSOrganization::class, 'user_id');
+    }
+
+    public function voluntaryWorks(){
+        return $this->hasMany(PDSVoluntaryWork::class, 'user_id');
+    }
+
+    public function governmentID(){
+        return $this->hasOne(PDSGovernmentId::class, 'user_id');
+    }
+
+    public function eligibilities(){
+        return $this->hasMany(PDSEligibility::class, 'user_id');
+    }
+
     public function personalData(){
         return $this->hasOne(PDSPersonalData::class, 'user_id');
+    }
+
+    public function address()
+    {
+        return $this->hasMany(PDSAddress::class, 'user_id');
+    }
+
+    public function residentialAddress()
+    {
+        return $this->hasOne(PDSAddress::class, 'user_id')->where('address_type', 'residential');
+    }
+
+    // Get permanent address only
+    public function permanentAddress()
+    {
+        return $this->hasOne(PDSAddress::class, 'user_id')->where('address_type', 'permanent');
     }
 
     public function getDisplayNameAttribute()
@@ -63,6 +128,9 @@ class User extends Authenticatable
     }
 
     public function family(){
+        return $this->hasOne(PDSFamilyBackground::class, 'user_id');
+    }
+    public function familyBackground(){
         return $this->hasOne(PDSFamilyBackground::class, 'user_id');
     }
 
@@ -225,5 +293,55 @@ class User extends Authenticatable
         ];
 
         return $colors[$this->status] ?? 'bg-gray-100 dark:bg-gray-700/30 text-gray-700 dark:text-gray-400';
+    }
+
+    /**
+     * Get user initials
+     */
+    public function getInitialsAttribute()
+    {
+        $name = $this->display_name;
+        $words = explode(' ', $name);
+        $initials = '';
+        
+        foreach ($words as $word) {
+            if (!empty($word)) {
+                $initials .= strtoupper(substr($word, 0, 1));
+            }
+        }
+        
+        return $initials ?: '?';
+    }
+
+    /**
+     * Get employment status label
+     */
+    public function getEmploymentStatusAttribute()
+    {
+        return $this->employment?->status_label ?? 'N/A';
+    }
+
+    /**
+     * Get department name
+     */
+    public function getDepartmentNameAttribute()
+    {
+        return $this->employment?->department?->name ?? 'N/A';
+    }
+
+    /**
+     * Get position title
+     */
+    public function getPositionTitleAttribute()
+    {
+        return $this->employment?->position?->title ?? 'N/A';
+    }
+
+    /**
+     * Get years of service
+     */
+    public function getYearsOfServiceAttribute()
+    {
+        return $this->employment?->years_of_service ?? 0;
     }
 }

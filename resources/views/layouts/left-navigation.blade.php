@@ -66,9 +66,6 @@ $menuItems = [
         'color' => 'from-emerald-500 to-teal-600',
         'submenu' => [
             ['title' => 'All Employees', 'route' => 'employees.index', 'icon' => 'bi-person-badge', 'permission' => 'view-employees'],
-            ['title' => 'Departments', 'route' => 'departments.index', 'icon' => 'bi-building', 'permission' => 'view-departments'],
-            ['title' => 'Positions', 'route' => 'positions.index', 'icon' => 'bi-briefcase', 'permission' => 'view-positions'],
-            ['title' => 'Employment Types', 'route' => 'employment-types.index', 'icon' => 'bi-tags', 'permission' => 'view-employment-types'],
         ]
     ],
     [

@@ -101,7 +101,7 @@
                         <div class="w-full h-full rounded-2xl bg-white dark:bg-gray-800 flex items-center justify-center overflow-hidden">
                             @if($personalData && $personalData->photo_path)
                                 <img src="{{ asset('storage/'.$personalData->photo_path) }}" 
-                                     alt="{{ $personalData->completeName() }}" 
+                                     alt="{{ $personalData ? $personalData->completeName() : 'N/A' }}" 
                                      class="w-full h-full object-cover">
                             @else
                                 <span class="text-3xl font-bold text-gray-400 dark:text-gray-500">
@@ -119,7 +119,7 @@
                     <div class="flex flex-col md:flex-row md:items-center md:justify-between">
                         <div>
                             <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
-                                {{ $personalData->completeName() }}
+                                {{ $personalData ? $personalData->completeName() : 'N/A' }}
                             </h1>
                             <div class="flex items-center mt-1 space-x-2 flex-wrap gap-2">
                                 @if($personalData && $personalData->sex)
@@ -392,7 +392,7 @@
                 </button>
                 <button class="tab-btn px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 transition-colors" 
                         data-tab="references" role="tab" aria-selected="false">
-                    <i class="bi bi-person-check mr-2"></i>
+                    <i class="fa-solid fa-user-check mr-2"></i>
                     References
                 </button>
                 <button class="tab-btn px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 border-b-2 border-transparent hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-300 dark:hover:border-gray-600 transition-colors" 
@@ -614,13 +614,49 @@
                                                         @endif
                                                     </div>
                                                     
-                                                    <!-- Full Address Display -->
-                                                    <div class="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
-                                                        <p class="text-xs text-gray-400 dark:text-gray-500">Full Address</p>
-                                                        <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                    <!-- Full Address -->
+                                                    <div class="flex-1 min-w-0 mt-6 mb-2">
+                                                        <div class="flex items-center gap-2">
+                                                            <span class="text-xs text-gray-400 dark:text-gray-500">Full Address</span>
+                                                        </div>
+                                                        <p class="text-sm font-medium text-gray-900 dark:text-white mt-0.5">
                                                             {{ $address->full_address ?? '—' }}
                                                         </p>
                                                     </div>
+                                                    
+                                                    <!-- Checkbox (only for residential addresses) -->
+                                                    @if($address->address_type == 'residential' && $address->is_permanent == 0)
+                                                        <form action="{{ route('myprofile.address.toggle-permanent', $address->id) }}" 
+                                                            method="POST" 
+                                                            class="inline-block"
+                                                            id="permanent-form-{{ $address->id }}">
+                                                            @csrf
+                                                            @method('PATCH')
+                                                            
+                                                            <input type="hidden" name="is_permanent" value="{{ $address->is_permanent ? 0 : 1 }}">
+                                                            
+                                                            <div class="flex items-center gap-2 flex-shrink-0 bg-gray-50 dark:bg-gray-700/30 px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-700/50 transition-colors group w-full sm:w-auto">
+                                                                <input type="checkbox" 
+                                                                    id="same_as_permanent_{{ $address->id }}" 
+                                                                    name="same_as_permanent" 
+                                                                    value="1"
+                                                                    {{ $address->is_permanent ? 'checked' : '' }}
+                                                                    onchange="
+                                                                        if (confirm(this.checked ? 'Mark this as your permanent address?' : 'Remove this as permanent address?')) {
+                                                                            document.getElementById('permanent-form-{{ $address->id }}').submit();
+                                                                        } else {
+                                                                            this.checked = !this.checked;
+                                                                        }
+                                                                    "
+                                                                    class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600 cursor-pointer">
+                                                                <label for="same_as_permanent_{{ $address->id }}" 
+                                                                    class="text-xs font-medium text-gray-700 dark:text-gray-300 cursor-pointer hover:text-green-700 dark:hover:text-green-400 transition-colors flex items-center gap-1 group-hover:text-green-700 dark:group-hover:text-green-400">
+                                                                    <!-- <i class="bi {{ $address->is_permanent ? 'bi-check-circle-fill' : 'bi-check-circle' }} text-green-500"></i> -->
+                                                                    {{ $address->is_permanent ? 'This is my permanent address' : 'This is also my permanent address' }}
+                                                                </label>
+                                                            </div>
+                                                        </form>
+                                                    @endif
 
                                                     <!-- Action Buttons -->
                                                     <div class="absolute top-3 right-3 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
@@ -704,7 +740,7 @@
                                                                         class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200"
                                                                         required>
                                                                     <option value="">Select Address Type</option>
-                                                                    <option value="residential">Present Address</option>
+                                                                    <option value="residential">Residential Address</option>
                                                                     <option value="permanent">Permanent Address</option>
                                                                 </select>
                                                                 <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">
@@ -1242,7 +1278,7 @@
                                                         @endif
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                                                        {{ $edu->period_from }} - {{ $edu->period_to }}
+                                                        {{ $edu->getYearRangeAttribute() }}
                                                     </td>
                                                     <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                                         <div class="flex items-center justify-end space-x-2">
@@ -1308,6 +1344,19 @@
                                 <input type="hidden" id="education_id" name="education_id" value="">
                                 
                                 <div class="space-y-6">
+                                    <!-- Order -->
+                                     <div>
+                                        <label for="education_order" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                            <i class="bi bi-sort-numeric-down text-yellow-500 mr-1"></i>
+                                            Display Order
+                                        </label>
+                                        <input type="number" 
+                                            id="education_order" 
+                                            name="order" 
+                                            min="1"
+                                            class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-yellow-500 focus:border-transparent transition-all duration-200"
+                                            placeholder="1, 2, 3...">
+                                    </div>
                                     <!-- Education Level -->
                                     <div>
                                         <label for="level" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
@@ -1376,7 +1425,7 @@
                                         <div>
                                             <label for="period_to" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                                 <i class="bi bi-calendar-end text-amber-500 mr-1"></i>
-                                                Year To <span class="text-red-500">*</span>
+                                                Year To
                                             </label>
                                             <input type="number" 
                                                 id="period_to" 
@@ -1385,7 +1434,7 @@
                                                 max="{{ date('Y') }}"
                                                 class="w-full px-4 py-2.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-900 dark:text-white focus:ring-2 focus:ring-amber-500 focus:border-transparent transition-all duration-200"
                                                 placeholder="YYYY"
-                                                required>
+                                                >
                                         </div>
 
                                         <!-- Year Graduated -->
@@ -3919,7 +3968,7 @@
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center">
                                     <div class="w-8 h-8 bg-gradient-to-r from-red-500 to-rose-600 rounded-lg flex items-center justify-center">
-                                        <i class="bi bi-person-check text-white"></i>
+                                        <i class="fa-solid fa-user-check text-white"></i>
                                     </div>
                                     <h3 class="ml-3 text-lg font-semibold text-gray-900 dark:text-white">References</h3>
                                     <span class="ml-2 px-2.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 text-xs font-medium rounded-full">
@@ -4151,9 +4200,9 @@
                             <!-- Question 34: Relationship to Appointing Authority -->
                             <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 border border-gray-200 dark:border-gray-600">
                                 <div class="flex items-start">
-                                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
+                                    <!-- <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
                                         34
-                                    </span>
+                                    </span> -->
                                     <div class="flex-1 b-2">
                                         <p class="text-sm font-medium text-gray-900 dark:text-white mb-3">
                                             Are you related by consanguinity or affinity to the appointing or recommending authority, or to the chief of bureau or office or to the person who has immediate supervision over you in the Office, Bureau or Department where you will be appointed?
@@ -4241,9 +4290,9 @@
                             <!-- Question 35: Administrative Offense & Criminal Charges -->
                             <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 border border-gray-200 dark:border-gray-600 mt-2">
                                 <div class="flex items-start">
-                                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
+                                    <!-- <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
                                         35
-                                    </span>
+                                    </span> -->
                                     <div class="flex-1 space-y-4">
                                         <!-- 35a -->
                                         <div>
@@ -4301,9 +4350,9 @@
                             <!-- Question 36: Conviction -->
                             <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 border border-gray-200 dark:border-gray-600 mt-2">
                                 <div class="flex items-start">
-                                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
+                                    <!-- <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
                                         36
-                                    </span>
+                                    </span> -->
                                     <div class="flex-1">
                                         <p class="text-sm font-medium text-gray-900 dark:text-white mb-2">
                                             Have you ever been convicted of any crime or violation of any law, decree, ordinance or regulation by any court or tribunal?
@@ -4335,9 +4384,9 @@
                             <!-- Question 37: Separation from Service -->
                             <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 border border-gray-200 dark:border-gray-600 mt-2">
                                 <div class="flex items-start">
-                                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
+                                    <!-- <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
                                         37
-                                    </span>
+                                    </span> -->
                                     <div class="flex-1">
                                         <p class="text-sm font-medium text-gray-900 dark:text-white mb-2">
                                             Have you ever been separated from the service in any of the following modes: resignation, retirement, dropped from the rolls, dismissal, termination, end of term, finished contract or phased out (abolition) in the public or private sector?
@@ -4369,9 +4418,9 @@
                             <!-- Question 38: Election Candidate -->
                             <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 border border-gray-200 dark:border-gray-600 mt-2">
                                 <div class="flex items-start">
-                                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
+                                    <!-- <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
                                         38
-                                    </span>
+                                    </span> -->
                                     <div class="flex-1 space-y-4">
                                         <!-- 38a -->
                                         <div>
@@ -4431,9 +4480,9 @@
                             <!-- Question 39: Immigrant Status -->
                             <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 border border-gray-200 dark:border-gray-600 mt-2">
                                 <div class="flex items-start">
-                                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
+                                    <!-- <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
                                         39
-                                    </span>
+                                    </span> -->
                                     <div class="flex-1">
                                         <p class="text-sm font-medium text-gray-900 dark:text-white mb-2">
                                             Have you acquired the status of an immigrant or permanent resident of another country?
@@ -4466,9 +4515,9 @@
                             <!-- Question 40: Special Status -->
                             <div class="bg-gray-50 dark:bg-gray-700/30 rounded-xl p-5 border border-gray-200 dark:border-gray-600 mt-2">
                                 <div class="flex items-start">
-                                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
+                                    <!-- <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 font-bold text-sm flex-shrink-0 mr-3 mt-0.5">
                                         40
-                                    </span>
+                                    </span> -->
                                     <div class="flex-1">
                                         <p class="text-sm font-medium text-gray-900 dark:text-white mb-3">
                                             Pursuant to: (a) Indigenous People's Act (RA 8371); (b) Magna Carta for Disabled Persons (RA 7277, as amended); and (c) Expanded Solo Parents Welfare Act (RA 11861), please answer the following items:
@@ -4878,6 +4927,7 @@
             document.getElementById('education_id').value = data.id;
             form.action = `/myprofile/education/${data.id}`;
             
+            document.getElementById('order').value = data.level || '';
             document.getElementById('level').value = data.level || '';
             document.getElementById('school_name').value = data.school_name || '';
             document.getElementById('degree_course').value = data.degree_course || '';
