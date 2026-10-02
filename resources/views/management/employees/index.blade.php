@@ -227,7 +227,7 @@
                                     </div>
                                 </td>
                                 <td class="px-4 py-3 text-sm text-gray-700">{{ $employee->employment->department->name ?? 'N/A' }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-700">{{ $employee->employment->position->title ?? 'N/A' }}</td>
+                                <td class="px-4 py-3 text-sm text-gray-700">{{ $employee->employment->position->title ?? 'N/A' }}<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs {{ $employee->employment?->employment_type_color ?? 'bg-gray-100 text-gray-800' }}">{{ $employee->employment->employment_type_label ?? '' }}</span></td>
                                 <td class="px-4 py-3">
                                     @if($employee->employment)
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $employee->employment->status_badge }}">

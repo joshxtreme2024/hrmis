@@ -10,7 +10,7 @@ use App\Http\Controllers\UsersController;
 use App\Http\Controllers\EducationController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\WorkExperienceController;
-use App\Http\Controllers\PersonalDataSheetsController;
+// use App\Http\Controllers\PersonalDataSheetsController;
 use App\Http\Controllers\ChildrenController;
 use App\Http\Controllers\EligibilityController;
 use App\Http\Controllers\TrainingController;
@@ -27,6 +27,7 @@ use App\Http\Controllers\MyDocumentController;
 use App\Http\Controllers\DocumentManagementController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\BackgroundInfoController;
+use App\Http\Controllers\PDSFormController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -59,6 +60,13 @@ Route::middleware(['auth'])->group(function () {
             'companyName' => setting('company_name', 'HRMIS'),
         ]);
     })->name('maintenance.preview');
+
+    Route::prefix('pds')->group(function () {
+        Route::get('/{userId}', [PDSFormController::class, 'show'])->name('pds.show');
+        Route::get('/{userId}/print', [PDSFormController::class, 'print'])->name('pds.print');
+        Route::get('/{userId}/pdf', [PDSFormController::class, 'generatePDF'])->name('pds.pdf');
+        Route::get('/{userId}/forms', [PDSFormController::class, 'index'])->name('pds.index');
+    });
 });
 
 Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
@@ -251,7 +259,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/payroll/benefits', [SettingsController::class, 'index'])->name('reports.index');
 
-    Route::resource('pds', PersonalDataSheetsController::class);
+    // Route::resource('pds', PersonalDataSheetsController::class);
 
     //employee documents  management routes
     Route::get('employee/documents', [DocumentManagementController::class, 'index'])->name('employee.documents.index');

@@ -98,6 +98,21 @@ class PDSEmployment extends Model
         return $types[strtolower($this->employment_type)] ?? ucfirst($this->employment_type);
     }
 
+    public function getEmploymentTypeColorAttribute(): string
+    {
+        $colors = [
+            'permanent' => 'bg-green-100 text-green-800',
+            'temporary' => 'bg-yellow-100 text-yellow-800',
+            'contractual' => 'bg-blue-100 text-blue-800',
+            'casual' => 'bg-gray-100 text-gray-800',
+            'job_order' => 'bg-indigo-100 text-indigo-800',
+            'consultant' => 'bg-purple-100 text-purple-800',
+            'co_term' => 'bg-red-100 text-red-800',
+        ];
+
+        return $colors[strtolower($this->employment_type)] ?? 'bg-gray-100 text-gray-800';
+    }
+
     // Date Formatters
     public function getFormattedHiredDateAttribute(): string
     {

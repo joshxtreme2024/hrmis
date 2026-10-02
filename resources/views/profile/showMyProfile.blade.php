@@ -21,6 +21,10 @@
         <i class="bi bi-chevron-right text-gray-300 dark:text-gray-600 mx-2 text-xs"></i>
         <span class="text-gray-800 dark:text-gray-200 font-medium">PDS</span>
     </li>
+    <li class="flex items-center">
+        <i class="bi bi-chevron-right text-gray-300 dark:text-gray-600 mx-2 text-xs"></i>
+        <span class="text-gray-800 dark:text-gray-200 font-medium">My PDS</span>
+    </li>
 @endsection
 
 <style>
@@ -144,10 +148,13 @@
                 
                 <div>
                     <a href="{{ route('mydocuments.index') }}"
-                        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-medium rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105"
-                        >
+                        class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-sm font-medium rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105">
                         <i class="fa-regular fa-folder mr-2 text-3xl"></i>
                         My 201 File
+                    </a>
+                    <a href="{{ route('pds.index', $user->id) }}" 
+                    class="inline-flex items-center px-4 py-2 bg-gradient-to-r from-yellow-600 to-orange-600 hover:from-yellow-700 hover:to-orange-700 text-white text-sm font-medium rounded-xl transition-all duration-200 shadow-md hover:shadow-lg transform hover:scale-105">
+                        <i class="fas fa-file-alt mr-2 text-3xl"></i> Generate PDS Form
                     </a>
                 </div>
             </div>

@@ -1346,7 +1346,9 @@
                                             </div>
                                             <div class="flex justify-between items-center py-2 border-b border-gray-100">
                                                 <span class="text-sm font-medium text-gray-600">Employment Type</span>
-                                                <span class="text-sm text-gray-900 font-medium">{{ $employee->employment->employment_type_label }}</span>
+                                                <span class="text-sm text-gray-900 font-medium px-2.5 py-0.5 rounded-full {{ $employee->employment->employment_type_color }}">
+                                                    {{ $employee->employment->employment_type_label }}
+                                                </span>
                                             </div>
                                         </div>
                                         <div class="space-y-4">
