@@ -28,6 +28,10 @@ use App\Http\Controllers\DocumentManagementController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\BackgroundInfoController;
 use App\Http\Controllers\PDSFormController;
+use App\Http\Controllers\LeaveTypeController;
+use App\Http\Controllers\LeaveApplicationController;
+use App\Http\Controllers\MyLeaveController;
+use App\Http\Controllers\PermissionController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -247,10 +251,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/attendance/overtime', [SettingsController::class, 'index'])->name('overtime.index');
     Route::get('/shifts', [SettingsController::class, 'index'])->name('shifts.index');
 
+    //leave types
     Route::get('/leave/requests', [SettingsController::class, 'index'])->name('leave.requests');
     Route::get('/leave/calendar', [SettingsController::class, 'index'])->name('leave.calendar');
-    Route::get('/leave/types', [SettingsController::class, 'index'])->name('leave.types');
     Route::get('/leave/my-requests', [SettingsController::class, 'index'])->name('leave.my-requests');
+    Route::resource('leave-types', LeaveTypeController::class)
+        ->only(['index', 'store', 'update', 'destroy']);
+ 
+    Route::patch('leave-types/{leave_type}/toggle', [LeaveTypeController::class, 'toggle'])
+        ->name('leave-types.toggle');
 
     Route::get('/payroll/salaries', [SettingsController::class, 'index'])->name('payroll.salaries');
     Route::get('/payroll/payslips', [SettingsController::class, 'index'])->name('payroll.payslips');
@@ -274,11 +283,22 @@ Route::middleware('auth')->group(function () {
     Route::get('employee/{document}/preview', [DocumentManagementController::class, 'preview'])->name('employee.documents.preview');
     Route::get('employee/documents/stream/{document}', [DocumentManagementController::class, 'stream'])
     ->name('employee.documents.stream');
+
+    //my-leave management
+     Route::resource('my-leaves', MyLeaveController::class)
+        ->parameters(['my-leaves' => 'leave_application'])
+        ->except(['destroy']);
+ 
+    Route::post('my-leaves/{leave_application}/cancel', [MyLeaveController::class, 'cancel'])
+        ->name('my-leaves.cancel');
 });
 
 Route::middleware(['auth', 'role:admin|hr'])->group(function () {
     Route::get('/settings', [SettingsController::class, 'index'])->name('settings');
     Route::get('/settings/roles', [SettingsController::class, 'roles'])->name('settings.roles');
+
+    //add permission
+    Route::post('/permissions', [PermissionController::class, 'store'])->name('permissions.store');
     
     //payroll
     Route::get('/payroll/benefits', [SettingsController::class, 'index'])->name('payroll.benefits');
@@ -377,6 +397,23 @@ Route::middleware(['auth', 'role:admin|hr'])->group(function () {
         Route::post('/{employee}/promote', [EmployeeController::class, 'showProfile'])->name('promote');
         Route::post('/{employee}/leave', [EmployeeController::class, 'showProfile'])->name('leave');
     });
+
+    //leave application management
+    Route::resource('leave-applications', LeaveApplicationController::class);
+ 
+    Route::post('leave-applications/{leave_application}/certify',   [LeaveApplicationController::class, 'certify'])->name('leave-applications.certify');
+    Route::post('leave-applications/{leave_application}/recommend', [LeaveApplicationController::class, 'recommend'])->name('leave-applications.recommend');
+    Route::post('leave-applications/{leave_application}/decide',    [LeaveApplicationController::class, 'decide'])->name('leave-applications.decide');
+    Route::post('leave-applications/{leave_application}/cancel',    [LeaveApplicationController::class, 'cancel'])->name('leave-applications.cancel');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::resource('leave-applications', LeaveApplicationController::class);
+ 
+    Route::post('leave-applications/{leave_application}/certify',   [LeaveApplicationController::class, 'certify'])->name('leave-applications.certify');
+    Route::post('leave-applications/{leave_application}/recommend', [LeaveApplicationController::class, 'recommend'])->name('leave-applications.recommend');
+    Route::post('leave-applications/{leave_application}/decide',    [LeaveApplicationController::class, 'decide'])->name('leave-applications.decide');
+    Route::post('leave-applications/{leave_application}/cancel',    [LeaveApplicationController::class, 'staffCancel'])->name('leave-applications.cancel');
 });
 
 require __DIR__.'/auth.php';

@@ -210,12 +210,26 @@
                     <!-- Nationality -->
                     <div>
                         <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Nationality <span class="text-red-500">*</span></label>
-                        <input type="text" name="nationality" value="{{ old('nationality', $personalData->nationality ?? '') }}" 
-                               class="mt-1 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-blue-500 focus:ring-blue-500 transition-colors @error('nationality') border-red-500 @enderror" 
-                               placeholder="Enter nationality" required>
+                        <select name="nationality" id="nationality" class="mt-1 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-blue-500 focus:ring-blue-500 transition-colors @error('nationality') border-red-500 @enderror" required>
+                            <option value="" selected>Select Citizenship</option>
+                            <option value="filipino">Filipino</option>
+                            <option value="dual_citizen">Dual Citizenship</option>
+                        </select>
                         @error('nationality')
                             <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                         @enderror
+                    </div>
+
+                    <div>
+                        <label>
+                            <input type="radio" name="nationality_birth" value="{{ old('nationality_birth', $personalData->nationality_birth ?? false) ? 'checked' : '' }}" class="mt-2">By Birth
+                        </label>
+                        <label>
+                            <input type="radio" name="nationality_birth" value="{{ old('nationality_birth', $personalData->nationality_birth ?? false) ? 'checked' : '' }}" class="mt-2">By Naturalization
+                        </label>
+                        <input type="text" name="nationality_country" value="{{ old('nationality_country', $personalData->nationality_country ?? '') }}" 
+                               class="mt-1 w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 focus:border-blue-500 focus:ring-blue-500 transition-colors" 
+                               placeholder="Enter country of nationality">
                     </div>
 
                     <!-- Religion -->

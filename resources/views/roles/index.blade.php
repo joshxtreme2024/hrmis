@@ -18,12 +18,17 @@
                 <h1 class="text-3xl font-bold text-white">Roles & Permissions</h1>
                 <p class="text-sm text-gray-100 mt-1">Manage user roles and their access permissions</p>
             </div>
-            <button onclick="openCreateRoleModal()" class="group inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 border border-transparent rounded-xl font-semibold text-sm text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200">
-                <svg class="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                </svg>
-                Create New Role
-            </button>
+            <div class="flex flex-wrap gap-3">
+                <button onclick="openCreateRoleModal()" class="group inline-flex items-center px-5 py-2.5 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 border border-transparent rounded-xl font-semibold text-sm text-white shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all duration-200">
+                    <svg class="w-5 h-5 mr-2 group-hover:rotate-90 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    Create New Role
+                </button>
+                <button onclick="openAddPermissionModal()" class="inline-flex items-center px-5 py-2.5 bg-white/15 hover:bg-white/25 border border-white/40 rounded-xl font-semibold text-sm text-white transition-all duration-200">
+                    <i class="bi bi-shield-plus mr-2"></i> Add Permission
+                </button>
+            </div>
         </div>
 
         <!-- Stats Cards -->
@@ -205,6 +210,48 @@
                 <button type="submit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm">
                     Save Role
                 </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="permissionModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 backdrop-blur-sm hidden z-50 flex items-center justify-center"
+     role="dialog" aria-modal="true" aria-labelledby="permissionModalTitle">
+    <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4">
+        <div class="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+            <h3 class="text-xl font-semibold text-gray-900" id="permissionModalTitle">Add Permission</h3>
+            <button type="button" onclick="closeAddPermissionModal()" class="text-gray-400 hover:text-gray-600 transition-colors" aria-label="Close">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+        </div>
+
+        <form id="permissionForm" onsubmit="submitAddPermission(event)" novalidate>
+            <div class="p-6 space-y-4">
+                <div id="permissionError" class="hidden rounded-lg border border-red-300 bg-red-50 px-4 py-2.5 text-sm text-red-800" role="alert"></div>
+
+                <div>
+                    <label for="permissionName" class="block text-sm font-semibold text-gray-700 mb-2">Permission name</label>
+                    <input type="text" id="permissionName" maxlength="100" required autocomplete="off"
+                           oninput="previewPermissionName()"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg font-mono text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                           placeholder="e.g. leaves_approve">
+                    <p class="mt-1 text-xs text-gray-500">
+                        Format: <span class="font-mono">module_action</span>. It will be grouped under
+                        <strong id="permissionGroupPreview">—</strong> on this page.
+                    </p>
+                </div>
+
+                <label class="flex items-start gap-3 text-sm text-gray-700 cursor-pointer">
+                    <input type="checkbox" id="permissionAssign" class="mt-0.5 w-4 h-4 text-indigo-600 rounded border-gray-300 focus:ring-indigo-500">
+                    <span>Also assign it to <strong id="permissionAssignRole">the selected role</strong></span>
+                </label>
+            </div>
+
+            <div class="px-6 py-4 bg-gray-50 rounded-b-2xl flex justify-end gap-3">
+                <button type="button" onclick="closeAddPermissionModal()" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
+                <button type="submit" id="permissionSubmit" class="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-lg hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-60">Add Permission</button>
             </div>
         </form>
     </div>
@@ -454,7 +501,105 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+<script>
+// Uses globals from the roles page script: currentRoleId, selectRole(), showNotification(), csrfToken
+function selectedRoleName() {
+    const el = document.querySelector('.role-item.bg-indigo-50 h3');
+    return el ? el.textContent.trim() : '';
+}
 
+function openAddPermissionModal() {
+    document.getElementById('permissionForm').reset();
+    document.getElementById('permissionError').classList.add('hidden');
+    document.getElementById('permissionGroupPreview').textContent = '—';
+
+    // Offer to assign to the role currently selected on the page
+    const assign = document.getElementById('permissionAssign');
+    const roleName = selectedRoleName();
+    assign.disabled = !roleName;
+    document.getElementById('permissionAssignRole').textContent = roleName ? '“' + roleName + '”' : 'the selected role (none selected)';
+
+    document.getElementById('permissionModal').classList.remove('hidden');
+    document.getElementById('permissionName').focus();
+}
+
+function closeAddPermissionModal() {
+    document.getElementById('permissionModal').classList.add('hidden');
+}
+
+// Keep the name in module_action form and show which group it will land in
+function previewPermissionName() {
+    const input = document.getElementById('permissionName');
+    input.value = input.value.toLowerCase().replace(/[\s-]+/g, '_').replace(/[^a-z0-9_]/g, '');
+    const group = input.value.split('_')[0];
+    document.getElementById('permissionGroupPreview').textContent = group ? group.charAt(0).toUpperCase() + group.slice(1) : '—';
+}
+
+function submitAddPermission(e) {
+    e.preventDefault();
+    const input = document.getElementById('permissionName');
+    const errBox = document.getElementById('permissionError');
+    const btn = document.getElementById('permissionSubmit');
+    const assign = document.getElementById('permissionAssign');
+    errBox.classList.add('hidden');
+
+    if (!input.value.trim()) {
+        errBox.textContent = 'Please enter a permission name.';
+        errBox.classList.remove('hidden');
+        return;
+    }
+
+    const roleId = currentRoleId;                    // from the roles page script
+    const roleName = selectedRoleName();
+    btn.disabled = true;
+
+    fetch("{{ route('permissions.store') }}", {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            'X-CSRF-TOKEN': csrfToken,
+            'X-Requested-With': 'XMLHttpRequest'
+        },
+        body: JSON.stringify({
+            name: input.value.trim(),
+            assign_to_role_id: assign.checked && roleId ? roleId : null
+        })
+    })
+    .then(async res => {
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw data;
+        return data;
+    })
+    .then(data => {
+        closeAddPermissionModal();
+        showNotification(data.message || 'Permission added.', 'success');
+
+        // Bump "Total Permissions"
+        const total = document.getElementById('total-permissions-count');
+        if (total) total.textContent = (parseInt(total.textContent, 10) || 0) + 1;
+
+        // Bump the selected role's count if we assigned it there
+        if (data.assigned && roleId) {
+            const p = document.querySelector(`[data-role-id="${roleId}"] p`);
+            if (p) p.textContent = ((parseInt(p.textContent, 10) || 0) + 1) + ' permission(s)';
+        }
+
+        // Reload the permission checklist so the new one appears
+        if (roleId) selectRole(roleId, roleName);
+    })
+    .catch(err => {
+        const msg = (err && err.errors && Object.values(err.errors)[0][0]) || (err && err.message) || 'Could not add the permission. Please try again.';
+        errBox.textContent = msg;
+        errBox.classList.remove('hidden');
+    })
+    .finally(() => { btn.disabled = false; });
+}
+
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape') closeAddPermissionModal();
+});
+</script>
 <style>
 @keyframes fadeInUp {
     from {

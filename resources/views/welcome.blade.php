@@ -5,314 +5,236 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="description" content="HRMIS - Human Resource Management Information System for Aguinaldo, Ifugao">
-
-    <title>{{ config('app.name', 'HRMIS') }} | Human Resource Management System</title>
+    <title>{{ config('app.name', 'HRMIS') }} | Human Resource Management Information System</title>
 
     @if(setting('favicon'))
-    <link rel="icon" href="{{ asset('storage/' . setting('favicon')) }}">
+        <link rel="icon" href="{{ asset('storage/' . setting('favicon')) }}">
     @else
         <link rel="icon" href="{{ asset('favicon.ico') }}">
     @endif
 
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
-    <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet" />
-
-    <!-- Bootstrap Icons -->
+    <link href="https://fonts.bunny.net/css?family=fraunces:600,700|figtree:400,500,600,700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-    <!-- Tailwind CSS via CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-
     <script>
         tailwind.config = {
             darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: {
-                        sans: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-                    },
-                }
-            }
+            theme: { extend: { fontFamily: {
+                sans: ['Figtree', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                display: ['Fraunces', 'Georgia', 'serif'],
+            }}}
         }
     </script>
 
     <style>
-        /* logo */
-        @keyframes fadeUp {
-            0% {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .animate-fade-up {
-            animation: fadeUp 0.7s ease-out forwards;
+        :root {
+            --terrace: #14392b;
+            --paddy: #2f6b4f;
+            --rice: #f6f3ea;
+            --ink: #1b2420;
+            --weave: #b3392b;
+            --ochre: #d9a441;
         }
 
-        /* Custom Styles */
-        .gradient-agui {
-            background: linear-gradient(135deg, #1a3a8a 0%, #2563eb 50%, #3b82f6 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
+        /* Ifugao-textile inspired band: the one decorative moment on the page */
+        .weave-band {
+            height: 10px;
+            background:
+                repeating-linear-gradient(90deg,
+                    var(--weave) 0 24px, var(--ochre) 24px 32px,
+                    var(--terrace) 32px 56px, var(--ochre) 56px 64px);
         }
 
-        .gradient-text {
-            background: linear-gradient(135deg, #2563eb 0%, #3a3ded 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #2563eb, #3a3ded);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-primary::before {
+        .hero-photo::after {
             content: '';
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(135deg, #1d4ed8, #3a3ded);
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(20,57,43,.55) 0%, rgba(20,57,43,.82) 60%, rgba(14,40,30,.95) 100%);
         }
 
-        .btn-primary:hover::before {
-            opacity: 1;
+        .field:focus-visible, .btn:focus-visible, a:focus-visible {
+            outline: 3px solid var(--ochre);
+            outline-offset: 2px;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px) scale(1.02);
-            box-shadow: 0 12px 30px -8px rgba(37, 99, 235, 0.5);
-        }
+        .btn { transition: background-color .2s ease, transform .2s ease; }
+        .btn:active { transform: translateY(1px); }
 
-        .btn-outline {
-            transition: all 0.3s ease;
-        }
+        @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        .rise { animation: rise .6s ease-out both; }
 
-        .btn-outline:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px -8px rgba(0, 0, 0, 0.15);
-        }
-
-        .image-overlay {
-            background: linear-gradient(135deg, 
-                rgba(37, 99, 235, 0.20) 0%,
-                rgba(124, 58, 237, 0.10) 50%,
-                rgba(0, 0, 0, 0.30) 100%
-            );
-        }
-
-        .photo-credit {
-            background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .badge-pulse {
-            display: inline-block;
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #22c55e;
-            animation: pulse-dot 2s ease-in-out infinite;
-        }
-
-        @keyframes pulse-dot {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.5; transform: scale(0.8); }
-        }
-
-        /* Ensure full height on both sides */
-        .split-container {
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        .image-side {
-            flex: 0 0 50%;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .image-side img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            object-position: center; /* ✅ This centers the image */
-        }
-
-        .content-side {
-            flex: 0 0 50%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            padding: 3rem 4rem;
-            background: linear-gradient(135deg, #f0f4ff 0%, #faf5ff 100%);
-        }
-
-        .dark .content-side {
-            background: linear-gradient(135deg, #111827 0%, #1a1a2e 100%);
-        }
-
-        @media (max-width: 768px) {
-            .split-container {
-                flex-direction: column;
-                height: auto;
-                min-height: 100vh;
-            }
-
-            .image-side {
-                flex: 0 0 300px;
-                width: 100%;
-            }
-
-            .image-side img {
-                object-position: center; /* ✅ Keeps centering on mobile */
-            }
-
-            .content-side {
-                flex: 1;
-                padding: 2rem 1.5rem;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .image-side {
-                flex: 0 0 250px;
-            }
-            
-            .content-side {
-                padding: 1.5rem 1rem;
-            }
+        @media (prefers-reduced-motion: reduce) {
+            .rise { animation: none; }
+            .btn { transition: none; }
         }
     </style>
 </head>
-<body class="antialiased">
+<body class="font-sans antialiased bg-[color:var(--rice)] text-[color:var(--ink)] dark:bg-gray-950 dark:text-gray-100">
 
-    <!-- Split Layout - Full Screen -->
-    <div class="split-container">
-        
-        <!-- Left Side: LGU Photo (50%) -->
-        <div class="image-side animate-fade-up">
-            <!-- LGU Photo -->
-            <img 
-                src="{{ asset('images/lgu.JPG') }}"
-                alt="Aguinaldo, Ifugao - Municipal Hall"
-                loading="lazy"
-            >
-            
-            <!-- Overlay -->
-            <div class="image-overlay absolute inset-0"></div>
-            
-            <!-- Photo Credit / Badge at bottom -->
-            <div class="absolute bottom-6 left-6 right-6 flex items-center justify-between">
-                <div class="photo-credit px-4 py-2 rounded-lg text-xs text-white/90">
-                    <span class="badge-pulse inline-block mr-2 align-middle"></span>
-                    <span class="align-middle font-medium">Municipality of Aguinaldo, Ifugao</span>
-                </div>
-                <div class="photo-credit px-4 py-2 rounded-lg text-xs text-white/70">
-                    <i class="bi bi-geo-alt mr-1"></i>
-                    Cordillera Administrative Region
+<div class="min-h-screen lg:grid lg:grid-cols-[1.15fr_1fr]">
+
+    {{-- ===== Information panel ===== --}}
+    <section class="hero-photo relative isolate overflow-hidden text-white flex flex-col">
+        <img src="{{ asset('images/lgu.JPG') }}" alt="Municipal Hall of Aguinaldo, Ifugao"
+             class="absolute inset-0 -z-10 h-full w-full object-cover object-center">
+
+        <div class="relative z-10 flex flex-1 flex-col justify-between gap-12 px-6 py-8 sm:px-10 lg:px-14 lg:py-12">
+
+            <div class="flex items-center gap-3">
+                @if(setting('logo'))
+                    <img src="{{ asset('storage/' . setting('logo')) }}" alt="Logo" class="h-14 w-auto">
+                @else
+                    <img src="{{ asset('images/default-logo.png') }}" alt="Logo" class="h-14 w-auto">
+                @endif
+                <div class="leading-tight">
+                    <p class="font-semibold">Municipality of Aguinaldo</p>
+                    <p class="text-sm text-white/70">Province of Ifugao</p>
                 </div>
             </div>
-        </div>
 
-        <!-- Right Side: Content (50%) -->
-        <div class="content-side">
-            
-            <!-- Title -->
-            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-4">
-                <div class="animate-fade-up">
-                    @if(setting('logo'))
-                        <img src="{{ asset('storage/' . setting('logo')) }}" alt="Logo" class="w-auto h-60">
-                    @else
-                        <img src="{{ asset('images/default-logo.png') }}" alt="Default Logo" class="h-60 w-auto">
-                    @endif
-                </div>
-                <span class="gradient-agui">Aguinaldo</span>
-                <br>
-                <span class="gradient-text">Human Resource</span>
-                <br>
-                <span class="text-gray-800 dark:text-gray-200">Management System</span>
-            </h1>
+            <div class="max-w-xl rise">
+                <h1 class="font-display text-4xl sm:text-5xl font-bold leading-[1.1]">
+                    Human Resource Management Information System
+                </h1>
+                <p class="mt-5 text-lg text-white/85 leading-relaxed max-w-[60ch]">
+                    One place for the LGU's employee records, daily attendance, leave requests, and payroll.
+                    Sign in with your account to see your own records or manage your office's.
+                </p>
 
-            <!-- Description -->
-            <p class="text-base sm:text-lg text-gray-600 dark:text-gray-400 leading-relaxed mb-8 max-w-lg">
-                Streamlining HR operations for the Municipality of Aguinaldo, Ifugao.
-                A comprehensive platform for employee management, attendance tracking, and payroll processing.
+                <ul class="mt-8 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+                    <li class="flex gap-3">
+                        <i class="bi bi-person-vcard text-xl text-[color:var(--ochre)]"></i>
+                        <div>
+                            <p class="font-semibold">Employee records</p>
+                            <p class="text-sm text-white/75">Personal data, service records, and 201 files.</p>
+                        </div>
+                    </li>
+                    <li class="flex gap-3">
+                        <i class="bi bi-clock-history text-xl text-[color:var(--ochre)]"></i>
+                        <div>
+                            <p class="font-semibold">Attendance</p>
+                            <p class="text-sm text-white/75">Daily time logs, tardiness, and undertime.</p>
+                        </div>
+                    </li>
+                    <li class="flex gap-3">
+                        <i class="bi bi-calendar2-check text-xl text-[color:var(--ochre)]"></i>
+                        <div>
+                            <p class="font-semibold">Leave management</p>
+                            <p class="text-sm text-white/75">File requests, track balances, and get approvals.</p>
+                        </div>
+                    </li>
+                    <li class="flex gap-3">
+                        <i class="bi bi-cash-stack text-xl text-[color:var(--ochre)]"></i>
+                        <div>
+                            <p class="font-semibold">Payroll</p>
+                            <p class="text-sm text-white/75">Salary computation, deductions, and payslips.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <p class="text-sm text-white/70">
+                Latest LGU news is on the
+                <a href="{{ setting('company_website') }}" target="_blank" rel="noopener"
+                   class="font-medium text-white underline underline-offset-4 hover:text-[color:var(--ochre)]">official municipal website</a>.
             </p>
+        </div>
+        <div class="weave-band relative z-10"></div>
+    </section>
 
-            <!-- Features -->
-            <div class="grid grid-cols-2 gap-2 mb-8 max-w-md">
-                <div class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                    <i class="bi bi-check-circle-fill text-blue-600 dark:text-blue-400"></i>
-                    <span>Employee Records</span>
-                </div>
-                <div class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                    <i class="bi bi-check-circle-fill text-blue-600 dark:text-blue-400"></i>
-                    <span>Attendance Tracking</span>
-                </div>
-                <div class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                    <i class="bi bi-check-circle-fill text-blue-600 dark:text-blue-400"></i>
-                    <span>Leave Management</span>
-                </div>
-                <div class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
-                    <i class="bi bi-check-circle-fill text-blue-600 dark:text-blue-400"></i>
-                    <span>Payroll Processing</span>
-                </div>
-            </div>
+    {{-- ===== Login panel ===== --}}
+    <main class="flex items-center justify-center px-6 py-12 sm:px-10">
+        <div class="w-full max-w-sm">
+            <h2 class="font-display text-3xl font-bold text-[color:var(--terrace)] dark:text-white">Sign in</h2>
+            <p class="mt-2 text-gray-600 dark:text-gray-400">Use the email address registered with HR.</p>
 
-            <!-- Action Buttons -->
-            @if (Route::has('login'))
-                <div class="flex flex-col sm:flex-row gap-3">
-                    @auth
-                        <a href="{{ url('/dashboard') }}" 
-                           class="btn-primary inline-flex items-center justify-center px-8 py-3 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 relative z-10 text-base">
-                            <i class="bi bi-speedometer2 mr-2"></i>
-                            <span class="relative z-10">Go to Dashboard</span>
-                        </a>
-                    @else
-                        <a href="{{ route('login') }}" 
-                           class="btn-primary inline-flex items-center justify-center px-8 py-3 text-white font-semibold rounded-xl shadow-lg shadow-blue-500/20 relative z-10 text-base">
-                            <i class="bi bi-box-arrow-in-right mr-2"></i>
-                            <span class="relative z-10">Sign In</span>
-                        </a>
-                        <a href="{{ route('register') }}" 
-                           class="btn-outline inline-flex items-center justify-center px-8 py-3 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 hover:border-blue-500 dark:hover:border-blue-500 text-gray-700 dark:text-gray-300 font-semibold rounded-xl shadow-md text-base">
-                            <i class="bi bi-person-plus mr-2"></i>
-                            Create Account
-                        </a>
-                    @endauth
+            @if (session('status'))
+                <div class="mt-6 rounded-lg border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-800" role="status">
+                    {{ session('status') }}
                 </div>
             @endif
 
-            <div class="mt-6 text-sm text-gray-500 dark:text-gray-400">
-                Visit the
-                <a href="{{ setting('company_website') }}" target="_blank" class="text-blue-600 dark:text-blue-400 hover:underline">
-                    Official website
-                </a>
-                of the Municipality of Aguinaldo, Ifugao for latest news.
-            </div>
+            @if ($errors->any())
+                <div class="mt-6 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+                    {{ $errors->first() }}
+                </div>
+            @endif
 
-            <!-- Version / Security -->
-            <p class="text-xs text-gray-400 dark:text-gray-500 mt-8 flex items-center gap-2">
+            <form method="POST" action="{{ route('login') }}" class="mt-8 space-y-5">
+                @csrf
+
+                <div>
+                    <label for="email" class="block text-sm font-medium mb-1.5">Email address</label>
+                    <div class="relative">
+                        <i class="bi bi-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input id="email" name="email" type="email" value="{{ old('email') }}"
+                               required autofocus autocomplete="username"
+                               class="field w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-3 text-base
+                                      focus:border-[color:var(--paddy)] dark:border-gray-700 dark:bg-gray-900
+                                      @error('email') border-red-500 @enderror">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-baseline justify-between mb-1.5">
+                        <label for="password" class="block text-sm font-medium">Password</label>
+                        @if (Route::has('password.request'))
+                            <a href="{{ route('password.request') }}"
+                               class="text-sm text-[color:var(--paddy)] hover:underline dark:text-green-400">Forgot password?</a>
+                        @endif
+                    </div>
+                    <div class="relative">
+                        <i class="bi bi-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input id="password" name="password" type="password" required autocomplete="current-password"
+                               class="field w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-11 text-base
+                                      focus:border-[color:var(--paddy)] dark:border-gray-700 dark:bg-gray-900
+                                      @error('password') border-red-500 @enderror">
+                        <button type="button" id="togglePassword" aria-label="Show password"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1.5 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200">
+                            <i class="bi bi-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <label class="flex items-center gap-2 text-sm">
+                    <input type="checkbox" name="remember" class="h-4 w-4 rounded border-gray-300 accent-[color:var(--paddy)]"
+                           {{ old('remember') ? 'checked' : '' }}>
+                    Keep me signed in on this device
+                </label>
+
+                <button type="submit"
+                        class="btn w-full rounded-lg bg-[color:var(--terrace)] px-4 py-3 font-semibold text-white hover:bg-[color:var(--paddy)]">
+                    Sign in
+                </button>
+            </form>
+
+            @if (Route::has('register'))
+                <p class="mt-6 text-sm text-gray-600 dark:text-gray-400">
+                    New employee?
+                    <a href="{{ route('register') }}" class="font-semibold text-[color:var(--weave)] hover:underline">Create an account</a>
+                </p>
+            @endif
+
+            <p class="mt-10 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-500">
                 <i class="bi bi-shield-check"></i>
-                <span>Secured by LGU Aguinaldo</span>
-                <span class="w-px h-3 bg-gray-300 dark:bg-gray-600"></span>
-                <span>v1.0</span>
+                Authorized LGU Aguinaldo personnel only. Activity on this system is logged.
             </p>
         </div>
-    </div>
+    </main>
+</div>
 
+<script>
+    (function () {
+        var btn = document.getElementById('togglePassword');
+        var input = document.getElementById('password');
+        var icon = document.getElementById('toggleIcon');
+        btn.addEventListener('click', function () {
+            var show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            icon.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
+            btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        });
+    })();
+</script>
 </body>
 </html>

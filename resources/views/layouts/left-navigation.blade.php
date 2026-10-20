@@ -90,10 +90,10 @@ $menuItems = [
         'badge' => '8 requests',
         'color' => 'from-purple-500 to-pink-600',
         'submenu' => [
-            ['title' => 'Leave Requests', 'route' => 'leave.requests', 'icon' => 'bi-inbox', 'permission' => 'view-leave', 'role' => ['admin', 'hr']],
+            ['title' => 'Leave Requests', 'route' => 'leave-applications.index', 'icon' => 'bi-inbox', 'permission' => 'view-leave', 'role' => ['admin', 'hr']],
             ['title' => 'Leave Calendar', 'route' => 'leave.calendar', 'icon' => 'bi-calendar3', 'permission' => 'view-leave'],
-            ['title' => 'Leave Types', 'route' => 'leave.types', 'icon' => 'bi-tag', 'permission' => 'view-leave-types', 'role' => ['admin', 'hr']],
-            ['title' => 'My Leaves', 'route' => 'leave.my-requests', 'icon' => 'bi-person-check', 'permission' => null],
+            ['title' => 'Leave Types', 'route' => 'leave-types.index', 'icon' => 'bi-tag', 'permission' => 'view-leave-types', 'role' => ['admin', 'hr']],
+            ['title' => 'My Leaves', 'route' => 'my-leaves.index', 'icon' => 'bi-person-check', 'permission' => null],
         ]
     ],
     [

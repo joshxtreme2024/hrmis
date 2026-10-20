@@ -9,7 +9,7 @@ class Permission extends Model
 {
     use HasFactory;
     
-    protected $fillable = ['name', 'label', 'description'];
+    protected $fillable = ['name', 'guard_name', 'label', 'description'];
     
     /**
      * ✅ Get the roles that have this permission.

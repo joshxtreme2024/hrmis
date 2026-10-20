@@ -29,6 +29,8 @@ class PDSPersonalData extends Model
         'account_status',
         'nationality',
         'religion',
+        'nationality_birth',
+        'nationality_country',
     ];
 
     protected $casts = [

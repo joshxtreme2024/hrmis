@@ -1,170 +1,240 @@
-@extends('layouts.guest')
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="description" content="HRMIS - Human Resource Management Information System for Aguinaldo, Ifugao">
+    <title>{{ config('app.name', 'HRMIS') }} | Human Resource Management Information System</title>
 
-@section('title', 'Login')
-@section('header', 'Welcome Back')
-@section('subheader', 'Sign in to access your HRMIS dashboard')
-
-@section('content')
-    <!-- Session Status -->
-    @if (session('status'))
-        <div class="mb-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <i class="bi bi-check-circle-fill text-green-500 text-lg"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm font-medium text-green-800 dark:text-green-300">
-                        {{ session('status') }}
-                    </p>
-                </div>
-            </div>
-        </div>
+    @if(setting('favicon'))
+        <link rel="icon" href="{{ asset('storage/' . setting('favicon')) }}">
+    @else
+        <link rel="icon" href="{{ asset('favicon.ico') }}">
     @endif
 
-    <!-- Error Messages Summary -->
-    @if ($errors->any())
-        <div class="mb-6 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl p-4">
-            <div class="flex items-center">
-                <div class="flex-shrink-0">
-                    <i class="bi bi-exclamation-circle-fill text-red-500 text-lg"></i>
-                </div>
-                <div class="ml-3">
-                    <p class="text-sm font-medium text-red-800 dark:text-red-300">
-                        {{ __('Please fix the following errors:') }}
-                    </p>
+    <link rel="preconnect" href="https://fonts.bunny.net">
+    <link href="https://fonts.bunny.net/css?family=fraunces:600,700|figtree:400,500,600,700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: { extend: { fontFamily: {
+                sans: ['Figtree', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+                display: ['Fraunces', 'Georgia', 'serif'],
+            }}}
+        }
+    </script>
+
+    <style>
+        :root {
+            --terrace: #0f2a6b;
+            --paddy: #2563eb;
+            --rice: #f1f5fd;
+            --ink: #14203a;
+            --weave: #1d4ed8;
+            --ochre: #7cc4ff;
+        }
+
+        /* Ifugao-textile inspired band, in blue: the one decorative moment on the page */
+        .weave-band {
+            height: 10px;
+            background:
+                repeating-linear-gradient(90deg,
+                    var(--weave) 0 24px, var(--ochre) 24px 32px,
+                    var(--terrace) 32px 56px, var(--ochre) 56px 64px);
+        }
+
+        .hero-photo::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(180deg, rgba(15,42,107,.55) 0%, rgba(15,42,107,.82) 60%, rgba(8,25,70,.95) 100%);
+        }
+
+        .field:focus-visible, .btn:focus-visible, a:focus-visible {
+            outline: 3px solid #3b82f6;
+            outline-offset: 2px;
+        }
+
+        .btn { transition: background-color .2s ease, transform .2s ease; }
+        .btn:active { transform: translateY(1px); }
+
+        @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+        .rise { animation: rise .6s ease-out both; }
+
+        @media (prefers-reduced-motion: reduce) {
+            .rise { animation: none; }
+            .btn { transition: none; }
+        }
+    </style>
+</head>
+<body class="font-sans antialiased bg-[color:var(--rice)] text-[color:var(--ink)] dark:bg-gray-950 dark:text-gray-100">
+
+<div class="min-h-screen lg:grid lg:grid-cols-[1.15fr_1fr]">
+
+    {{-- ===== Information panel ===== --}}
+    <section class="hero-photo relative isolate overflow-hidden text-white flex flex-col">
+        <img src="{{ asset('images/lgu.JPG') }}" alt="Municipal Hall of Aguinaldo, Ifugao"
+             class="absolute inset-0 -z-10 h-full w-full object-cover object-center">
+
+        <div class="relative z-10 flex flex-1 flex-col justify-between gap-12 px-6 py-8 sm:px-10 lg:px-14 lg:py-12">
+
+            <div class="flex items-center gap-3">
+                @if(setting('logo'))
+                    <img src="{{ asset('storage/' . setting('logo')) }}" alt="Logo" class="h-14 w-auto">
+                @else
+                    <img src="{{ asset('images/default-logo.png') }}" alt="Logo" class="h-14 w-auto">
+                @endif
+                <div class="leading-tight">
+                    <p class="font-semibold">Municipality of Aguinaldo</p>
+                    <p class="text-sm text-white/70">Province of Ifugao</p>
                 </div>
             </div>
-        </div>
-    @endif
 
-    <form method="POST" action="{{ route('login') }}" class="space-y-6">
-        @csrf
-
-        <!-- Email Address -->
-        <div>
-            <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                {{ __('Email Address') }}
-            </label>
-            <div class="relative group">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i class="bi bi-envelope-fill text-gray-400 group-focus-within:text-blue-500 transition-colors"></i>
-                </div>
-                <input 
-                    id="email" 
-                    type="email" 
-                    name="email" 
-                    value="{{ old('email') }}" 
-                    required 
-                    autofocus 
-                    autocomplete="username"
-                    placeholder="you@example.com"
-                    class="block w-full pl-10 pr-3 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all @error('email') border-red-500 dark:border-red-500 @enderror"
-                />
-            </div>
-            @error('email')
-                <p class="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center">
-                    <i class="bi bi-exclamation-circle mr-1"></i>
-                    {{ $message }}
+            <div class="max-w-xl rise">
+                <h1 class="font-display text-4xl sm:text-5xl font-bold leading-[1.1]">
+                    Human Resource Management Information System
+                </h1>
+                <p class="mt-5 text-lg text-white/85 leading-relaxed max-w-[60ch]">
+                    One place for the LGU's employee records, daily attendance, leave requests, and payroll.
+                    Sign in with your account to see your own records or manage your office's.
                 </p>
-            @enderror
-        </div>
 
-        <!-- Password -->
-        <div x-data="{ showPassword: false }">
-            <div class="flex items-center justify-between mb-2">
-                <label for="password" class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                    {{ __('Password') }}
+                <ul class="mt-8 grid gap-x-8 gap-y-5 sm:grid-cols-2">
+                    <li class="flex gap-3">
+                        <i class="bi bi-person-vcard text-xl text-[color:var(--ochre)]"></i>
+                        <div>
+                            <p class="font-semibold">Employee records</p>
+                            <p class="text-sm text-white/75">Personal data, service records, and 201 files.</p>
+                        </div>
+                    </li>
+                    <li class="flex gap-3">
+                        <i class="bi bi-clock-history text-xl text-[color:var(--ochre)]"></i>
+                        <div>
+                            <p class="font-semibold">Attendance</p>
+                            <p class="text-sm text-white/75">Daily time logs, tardiness, and undertime.</p>
+                        </div>
+                    </li>
+                    <li class="flex gap-3">
+                        <i class="bi bi-calendar2-check text-xl text-[color:var(--ochre)]"></i>
+                        <div>
+                            <p class="font-semibold">Leave management</p>
+                            <p class="text-sm text-white/75">File requests, track balances, and get approvals.</p>
+                        </div>
+                    </li>
+                    <li class="flex gap-3">
+                        <i class="bi bi-cash-stack text-xl text-[color:var(--ochre)]"></i>
+                        <div>
+                            <p class="font-semibold">Payroll</p>
+                            <p class="text-sm text-white/75">Salary computation, deductions, and payslips.</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <p class="text-sm text-white/70">
+                Latest LGU news is on the
+                <a href="{{ setting('company_website') }}" target="_blank" rel="noopener"
+                   class="font-medium text-white underline underline-offset-4 hover:text-[color:var(--ochre)]">official municipal website</a>.
+            </p>
+        </div>
+        <div class="weave-band relative z-10"></div>
+    </section>
+
+    {{-- ===== Login panel ===== --}}
+    <main class="flex items-center justify-center px-6 py-12 sm:px-10">
+        <div class="w-full max-w-sm">
+            <h2 class="font-display text-3xl font-bold text-[color:var(--terrace)] dark:text-white">Sign in</h2>
+            <p class="mt-2 text-gray-600 dark:text-gray-400">Use the email address registered with HR.</p>
+
+            @if (session('status'))
+                <div class="mt-6 rounded-lg border border-green-300 bg-green-50 px-4 py-3 text-sm text-green-800" role="status">
+                    {{ session('status') }}
+                </div>
+            @endif
+
+            @if ($errors->any())
+                <div class="mt-6 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
+                    {{ $errors->first() }}
+                </div>
+            @endif
+
+            <form method="POST" action="{{ route('login') }}" class="mt-8 space-y-5">
+                @csrf
+
+                <div>
+                    <label for="email" class="block text-sm font-medium mb-1.5">Email address</label>
+                    <div class="relative">
+                        <i class="bi bi-envelope absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input id="email" name="email" type="email" value="{{ old('email') }}"
+                               required autofocus autocomplete="username"
+                               class="field w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-3 text-base
+                                      focus:border-[color:var(--paddy)] dark:border-gray-700 dark:bg-gray-900
+                                      @error('email') border-red-500 @enderror">
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-baseline justify-between mb-1.5">
+                        <label for="password" class="block text-sm font-medium">Password</label>
+                        @if (Route::has('password.request'))
+                            <a href="{{ route('password.request') }}"
+                               class="text-sm text-[color:var(--paddy)] hover:underline dark:text-blue-400">Forgot password?</a>
+                        @endif
+                    </div>
+                    <div class="relative">
+                        <i class="bi bi-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                        <input id="password" name="password" type="password" required autocomplete="current-password"
+                               class="field w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-11 text-base
+                                      focus:border-[color:var(--paddy)] dark:border-gray-700 dark:bg-gray-900
+                                      @error('password') border-red-500 @enderror">
+                        <button type="button" id="togglePassword" aria-label="Show password"
+                                class="absolute right-2 top-1/2 -translate-y-1/2 rounded p-1.5 text-gray-500 hover:text-gray-800 dark:hover:text-gray-200">
+                            <i class="bi bi-eye" id="toggleIcon"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <label class="flex items-center gap-2 text-sm">
+                    <input type="checkbox" name="remember" class="h-4 w-4 rounded border-gray-300 accent-[color:var(--paddy)]"
+                           {{ old('remember') ? 'checked' : '' }}>
+                    Keep me signed in on this device
                 </label>
-                <!-- @if (Route::has('password.request'))
-                    <a href="{{ route('password.request') }}" class="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors">
-                        Forgot?
-                    </a>
-                @endif -->
-            </div>
-            <div class="relative group">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <i class="bi bi-lock-fill text-gray-400 group-focus-within:text-blue-500 transition-colors"></i>
-                </div>
-                <input 
-                    id="password" 
-                    :type="showPassword ? 'text' : 'password'"
-                    name="password" 
-                    required 
-                    autocomplete="current-password"
-                    placeholder="••••••••"
-                    class="block w-full pl-10 pr-10 py-3 border border-gray-300 dark:border-gray-600 rounded-xl bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all @error('password') border-red-500 dark:border-red-500 @enderror"
-                />
-                <button type="button" 
-                        @click="showPassword = !showPassword" 
-                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors focus:outline-none">
-                    <i class="bi text-lg" :class="showPassword ? 'bi-eye-slash-fill' : 'bi-eye-fill'"></i>
+
+                <button type="submit"
+                        class="btn w-full rounded-lg bg-[color:var(--terrace)] px-4 py-3 font-semibold text-white hover:bg-[color:var(--paddy)]">
+                    Sign in
                 </button>
-            </div>
-            @error('password')
-                <p class="mt-2 text-sm text-red-600 dark:text-red-400 flex items-center">
-                    <i class="bi bi-exclamation-circle mr-1"></i>
-                    {{ $message }}
+            </form>
+
+            @if (Route::has('register'))
+                <p class="mt-6 text-sm text-gray-600 dark:text-gray-400">
+                    New employee?
+                    <a href="{{ route('register') }}" class="font-semibold text-[color:var(--weave)] hover:underline">Create an account</a>
                 </p>
-            @enderror
+            @endif
+
+            <p class="mt-10 flex items-center gap-2 text-xs text-gray-500 dark:text-gray-500">
+                <i class="bi bi-shield-check"></i>
+                Authorized LGU Aguinaldo personnel only. Activity on this system is logged.
+            </p>
         </div>
+    </main>
+</div>
 
-        <!-- Remember Me -->
-        <div class="flex items-center justify-between">
-            <label class="flex items-center cursor-pointer group">
-                <input type="checkbox" 
-                       name="remember" 
-                       class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                       {{ old('remember') ? 'checked' : '' }}>
-                <span class="ml-2 text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors">
-                    {{ __('Remember me') }}
-                </span>
-            </label>
-
-            <!-- Demo Credentials Hint (Optional - remove in production) -->
-            <!-- <div class="text-xs text-gray-400 dark:text-gray-500 flex items-center">
-                <i class="bi bi-info-circle mr-1"></i>
-                Demo: admin@hrms.com / password
-            </div> -->
-        </div>
-
-        <!-- Login Button -->
-        <div>
-            <button type="submit" 
-                    class="w-full flex justify-center items-center py-3 px-4 border border-transparent rounded-xl shadow-lg text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transform hover:scale-[1.02] transition-all duration-200">
-                <i class="bi bi-box-arrow-in-right mr-2"></i>
-                {{ __('Sign in') }}
-            </button>
-        </div>
-
-        <!-- Social Login Options (Optional) -->
-        <!-- <div class="relative my-6">
-            <div class="absolute inset-0 flex items-center">
-                <div class="w-full border-t border-gray-300 dark:border-gray-600"></div>
-            </div>
-            <div class="relative flex justify-center text-sm">
-                <span class="px-2 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-400">Or continue with</span>
-            </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-            <button type="button" 
-                    class="flex justify-center items-center py-2.5 px-4 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
-                <i class="bi bi-google text-red-500 mr-2"></i>
-                Google
-            </button>
-            <button type="button" 
-                    class="flex justify-center items-center py-2.5 px-4 border border-gray-300 dark:border-gray-600 rounded-xl shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-all">
-                <i class="bi bi-microsoft text-blue-500 mr-2"></i>
-                Microsoft
-            </button>
-        </div> -->
-    </form>
-
-    <!-- Sign Up Link -->
-    <p class="mt-6 text-center text-sm text-gray-600 dark:text-gray-400">
-        Don't have an account?
-        <a href="{{ route('register') }}" class="font-medium text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 transition-colors">
-            Create an account
-        </a>
-    </p>
-@endsection
+<script>
+    (function () {
+        var btn = document.getElementById('togglePassword');
+        var input = document.getElementById('password');
+        var icon = document.getElementById('toggleIcon');
+        btn.addEventListener('click', function () {
+            var show = input.type === 'password';
+            input.type = show ? 'text' : 'password';
+            icon.className = show ? 'bi bi-eye-slash' : 'bi bi-eye';
+            btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+        });
+    })();
+</script>
+</body>
+</html>
