@@ -6,11 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Departments;
 use App\Models\Positions;
-use App\Models\Leave;
+use App\Models\LeaveApplication;
+use App\Models\LeaveCredit;
 use App\Models\Attendance;
 use App\Models\PDSEmployment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class DashboardController extends Controller
 {
@@ -122,17 +124,17 @@ class DashboardController extends Controller
         $presentToday = 0; //Attendance::whereDate('date', now()->toDateString())
             // ->whereNotNull('check_in')
             // ->count();
-        $onLeaveToday = 0; //Leave::whereDate('date_from', '<=', now())
-            // ->whereDate('date_to', '>=', now())
-            // ->where('status', 'approved')
-            // ->count();
+        $onLeaveToday = LeaveApplication::whereDate('date_from', '<=', now())
+            ->whereDate('date_to', '>=', now())
+            ->where('status', 'approved')
+            ->count();
         $absentToday = 0; //max(0, $total - $presentToday - $onLeaveToday);
         $lateToday = 0; //Attendance::whereDate('date', now()->toDateString())
             // ->whereNotNull('check_in')
             // ->where('check_in', '>', now()->setTime(8, 0, 0)->toTimeString())
             // ->count();
         $departments = Departments::count();
-        $pendingActions = 0; //Leave::where('status', 'pending')->count();
+        $pendingActions = LeaveApplication::where('status', 'pending')->count();
 
         return [
             'total_employees' => $total,
@@ -161,10 +163,10 @@ class DashboardController extends Controller
         //     $q->whereDate('date', $today);
         // })->count();
         
-        $onLeave = 0; //Leave::whereDate('date_from', '<=', now())
-            // ->whereDate('date_to', '>=', now())
-            // ->where('status', 'approved')
-            // ->count();
+        $onLeave = LeaveApplication::whereDate('date_from', '<=', now())
+            ->whereDate('date_to', '>=', now())
+            ->where('status', 'approved')
+            ->count();
             
         $late = 0; //Attendance::whereDate('date', $today)
             // ->whereNotNull('check_in')
@@ -254,31 +256,31 @@ class DashboardController extends Controller
      */
     private function getLeaveMonitoring()
     {
-        $pending = 0; //Leave::where('status', 'pending')->count();
-        $approved = 0; //Leave::where('status', 'approved')->count();
-        $rejected = 0; //Leave::where('status', 'rejected')->count();
+        $pending = LeaveApplication::where('status', 'pending')->count();
+        $approved = LeaveApplication::where('status', 'approved')->count();
+        $rejected = LeaveApplication::where('status', 'disapproved')->count();
         
-        $onLeaveToday = 0; //Leave::whereDate('date_from', '<=', now())
-            // ->whereDate('date_to', '>=', now())
-            // ->where('status', 'approved')
-            // ->count();
+        $onLeaveToday = LeaveApplication::whereDate('date_from', '<=', now())
+            ->whereDate('date_to', '>=', now())
+            ->where('status', 'approved')
+            ->count();
             
         // Upcoming leaves (next 7 days)
-        $upcoming = []; //Leave::with('user')
-            // ->whereDate('date_from', '>=', now())
-            // ->whereDate('date_from', '<=', now()->addDays(7))
-            // ->where('status', 'approved')
-            // ->orderBy('date_from')
-            // ->limit(5)
-            // ->get()
-            // ->map(function($leave) {
-            //     return [
-            //         'employee' => $leave->user->display_name ?? 'N/A',
-            //         'date' => $leave->date_from->format('M d'),
-            //         'type' => $leave->type,
-            //     ];
-            // })
-            // ->toArray();
+        $upcoming = []; LeaveApplication::with('user')
+            ->whereDate('date_from', '>=', now())
+            ->whereDate('date_from', '<=', now()->addDays(7))
+            ->where('status', 'approved')
+            ->orderBy('date_from')
+            ->limit(5)
+            ->get()
+            ->map(function($leave) {
+                return [
+                    'employee' => $leave->user->display_name ?? 'N/A',
+                    'date' => $leave->date_from->format('M d'),
+                    'type' => $leave->type,
+                ];
+            })
+            ->toArray();
 
         return [
             'pending' => $pending,
@@ -297,10 +299,10 @@ class DashboardController extends Controller
         $alerts = [];
 
         // Expiring contracts (within 30 days)
-        $expiringContracts = 0; //User::whereHas('employment', function($q) {
-        //     $q->whereDate('contract_end', '<=', now()->addDays(30))
-        //       ->whereDate('contract_end', '>=', now());
-        // })->count();
+        $expiringContracts = User::whereHas('employment', function($q) {
+            $q->whereDate('contract_end', '<=', now()->addDays(30))
+              ->whereDate('contract_end', '>=', now());
+        })->count();
         
         if ($expiringContracts > 0) {
             $alerts[] = [
@@ -312,7 +314,7 @@ class DashboardController extends Controller
         }
 
         // Pending leave applications
-        $pendingLeaves = 0; //Leave::where('status', 'pending')->count();
+        $pendingLeaves = LeaveApplication::where('status', 'pending')->count();
         if ($pendingLeaves > 0) {
             $alerts[] = [
                 'type' => 'danger',
@@ -549,7 +551,7 @@ class DashboardController extends Controller
             [
                 'icon' => 'bi-file-text',
                 'label' => 'File Leave',
-                'route' => route('hr.leaves.create'),
+                'route' => route('my-leaves.create'),
                 'color' => 'green',
             ],
             [
@@ -567,13 +569,13 @@ class DashboardController extends Controller
             [
                 'icon' => 'bi-check-circle',
                 'label' => 'Process Leave',
-                'route' => route('hr.leaves.pending'),
+                'route' => route('leave-applications.index'),
                 'color' => 'indigo',
             ],
             [
                 'icon' => 'bi-search',
                 'label' => 'Search',
-                'route' => route('hr.employees.search'),
+                'route' => route('employees.index'),
                 'color' => 'gray',
             ],
         ];
@@ -646,46 +648,47 @@ class DashboardController extends Controller
      */
     private function getEmployeeLeaveSummary($user)
     {
-        $pending = 0; //Leave::where('user_id', $user->id)
-            // ->where('status', 'pending')
-            // ->count();
+        $pending = LeaveApplication::where('emp_id', $user->id)
+            ->where('status', 'pending')
+            ->count();
             
-        $approved = 0; //Leave::where('user_id', $user->id)
-            // ->where('status', 'approved')
-            // ->count();
+        $approved = LeaveApplication::where('emp_id', $user->id)
+            ->where('status', 'approved')
+            ->count();
             
-        $rejected = 0; //Leave::where('user_id', $user->id)
-            // ->where('status', 'rejected')
-            // ->count();
+        $rejected = LeaveApplication::where('emp_id', $user->id)
+            ->where('status', 'disapproved')
+            ->count();
             
-        $upcoming = []; //Leave::where('user_id', $user->id)
-            // ->where('status', 'approved')
-            // ->whereDate('date_from', '>=', now())
-            // ->orderBy('date_from')
-            // ->limit(5)
-            // ->get()
-            // ->map(function($leave) {
-            //     return [
-            //         'type' => $leave->type,
-            //         'date_from' => $leave->date_from->format('M d'),
-            //         'date_to' => $leave->date_to->format('M d'),
-            //         'status' => $leave->status,
-            //     ];
-            // });
+        $upcoming = []; LeaveApplication::where('emp_id', $user->id)
+            ->where('status', 'approved')
+            ->whereDate('date_from', '>=', now())
+            ->orderBy('date_from')
+            ->limit(5)
+            ->get()
+            ->map(function($leave) {
+                return [
+                    'type' => $leave->type,
+                    'date_from' => $leave->date_from->format('M d'),
+                    'date_to' => $leave->date_to->format('M d'),
+                    'status' => $leave->status,
+                ];
+            });
+
+        $balances = LeaveCredit::query()
+            ->where('emp_id', $user->id)
+            ->join('leave_types', 'leave_credits.leave_type_id', '=', 'leave_types.id')
+            ->selectRaw('
+                leave_types.code,
+                COALESCE(SUM(leave_credits.total_earned - leave_credits.total_used), 0) AS balance
+            ')
+            ->groupBy('leave_types.code')
+            ->pluck('balance', 'code');
 
         $leaveBalance = [
-            'vacation' => 0, //15 - Leave::where('user_id', $user->id)
-                // ->where('type', 'vacation')
-                // ->where('status', 'approved')
-                // ->sum(DB::raw('DATEDIFF(date_to, date_from) + 1')),
-            'sick' => 0, //15 - Leave::where('user_id', $user->id)
-                // ->where('type', 'sick')
-                // ->where('status', 'approved')
-                // ->sum(DB::raw('DATEDIFF(date_to, date_from) + 1')),
-            'emergency' => 0, //5 - Leave::where('user_id', $user->id)
-                // ->where('type', 'emergency')
-                // ->where('status', 'approved')
-                // ->sum(DB::raw('DATEDIFF(date_to, date_from) + 1')),
+            'vacation' => (float) ($balances['VL'] ?? 0),
+            'sick' => (float) ($balances['SL'] ?? 0),
+            'forced_leave' => (float) ($balances['MFL'] ?? 0),
         ];
 
         return [
@@ -706,7 +709,7 @@ class DashboardController extends Controller
             [
                 'icon' => 'bi-file-text',
                 'label' => 'File Leave',
-                'route' => route('employee.leaves.create'),
+                'route' => route('my-leaves.create'),
                 'color' => 'blue',
             ],
             [
@@ -718,19 +721,19 @@ class DashboardController extends Controller
             [
                 'icon' => 'bi-clock-history',
                 'label' => 'Leave History',
-                'route' => route('employee.leaves.history'),
+                'route' => route('my-leaves.index'),
                 'color' => 'yellow',
             ],
             [
                 'icon' => 'bi-person-badge',
                 'label' => 'My Profile',
-                'route' => route('employee.profile.show'),
+                'route' => route('myprofile.show'),
                 'color' => 'purple',
             ],
             [
                 'icon' => 'bi-file-earmark-text',
                 'label' => 'PDS',
-                'route' => route('employee.pds.show'),
+                'route' => route('pds.index', auth()->id()),
                 'color' => 'indigo',
             ],
         ];

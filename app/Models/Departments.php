@@ -8,7 +8,7 @@ class Departments extends Model
 {
     protected $table = 'departments';
     protected $fillable = [
-        'name','code','description','status',
+        'name','code','description','status', 'signatory_position', 'signatory_name', 'signature_path',
     ];
 
     public function positions(){

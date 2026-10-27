@@ -105,6 +105,51 @@
             @enderror
         </div>
 
+        <!-- signtories part -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Name -->
+            <div class="space-y-1">
+                <label for="signatory_name" class="block text-sm font-semibold text-gray-700">
+                    Department Head <span class="text-red-500">*</span>
+                </label>
+                <div class="relative rounded-md shadow-sm">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                    </div>
+                    <input type="text" name="signatory_name" id="signatory_name" 
+                           value="{{ old('signatory_name', isset($department) ? $department->signatory_name : '') }}"
+                           class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 @error('name') border-red-300 text-red-900 placeholder-red-300 @enderror"
+                           placeholder="e.g., CLEMENTE S. TALUSIG" required>
+                </div>
+                @error('signatory_name')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <!-- signatory_position -->
+            <div class="space-y-1">
+                <label for="signatory_position" class="block text-sm font-semibold text-gray-700">
+                    Position <span class="text-red-500">*</span>
+                </label>
+                <div class="relative rounded-md shadow-sm">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                        <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" />
+                        </svg>
+                    </div>
+                    <input type="text" name="signatory_position" id="signatory_position" 
+                           value="{{ old('signatory_position', isset($department) ? $department->signatory_position : '') }}"
+                           class="block w-full pl-10 pr-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors duration-200 @error('code') border-red-300 text-red-900 placeholder-red-300 @enderror"
+                           placeholder="e.g., Municipal Mayor" required>
+                </div>
+                @error('signatory_position')
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                @enderror
+            </div>
+        </div>
+
         <!-- Form Actions -->
         <div class="flex items-center justify-end space-x-4 pt-6 border-t border-gray-200">
             <a href="{{ route('departments.index') }}" 

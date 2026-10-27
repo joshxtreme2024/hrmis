@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Departments;
+use App\Models\Department;
 use App\Models\PDSEmployment;
 use App\Models\PDSPersonalData;
+use App\Services\LeaveLedgerService;
 use App\Support\EmployeeProfile;
 use App\Models\LeaveApplication;
 use App\Models\LeaveType;
@@ -194,11 +195,9 @@ class LeaveApplicationController extends Controller
 
             $app->update($d + ['approved_by' => auth()->id(), 'decided_at' => now()]);
 
-            // Deduct paid days from the employee's VL / SL credits
+            // Post the paid days to the leave ledger (also updates the leave_credits summary)
             if ($d['status'] === 'approved' && $app->leaveType->is_credit_based && ($d['approved_days_with_pay'] ?? 0) > 0) {
-                DB::table('leave_credits')
-                    ->where('emp_id', $app->emp_id)->where('leave_type_id', $app->leave_type_id)
-                    ->increment('total_used', $d['approved_days_with_pay']);
+                app(LeaveLedgerService::class)->postUsage($app);
             }
         });
 
@@ -227,7 +226,7 @@ class LeaveApplicationController extends Controller
         return [
             'application' => $application,
             'leaveTypes'  => LeaveType::active()->orWhere('id', $application->leave_type_id)->orderBy('name')->get(),
-            'departments' => Departments::orderBy('name')->get(),
+            'departments' => Department::orderBy('name')->get(),
             // Name / department / position come from the PDS + employment record (see App\Support\EmployeeProfile).
             'employees'   => $this->employeeOptions(),
         ];

@@ -12,8 +12,9 @@ use App\Models\PDSEmployment;
 class EmployeeProfile
 {
     // Columns of the PDS personal data table (only used for searching the HR employee list)
-    public const SURNAME    = 'surname';
+    public const SURNAME    = 'last_name';
     public const FIRST_NAME = 'first_name';
+    public const MIDDLE_NAME = 'middle_name';
 
     // Column on PDSEmployment that holds the monthly salary
     public const SALARY = 'salary';
@@ -23,6 +24,19 @@ class EmployeeProfile
         if (! $pds) return '—';
 
         return (method_exists($pds, 'completeName') ? $pds->completeName() : null) ?: '—';
+    }
+
+    /** [last, first, middle] for the printed leave form. Falls back to the full name in the first slot. */
+    public static function nameParts($pds): array
+    {
+        $last  = (string) data_get($pds, self::SURNAME);
+        $first = (string) data_get($pds, self::FIRST_NAME);
+
+        if ($last === '' && $first === '') {
+            return [self::name($pds), '', ''];
+        }
+
+        return [$last, $first, (string) data_get($pds, self::MIDDLE_NAME)];
     }
 
     /** The PDSEmployment of this PDS record's user. Pass a preloaded one to avoid extra queries. */

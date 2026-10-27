@@ -1,21 +1,22 @@
-{{-- Page header banner: same pattern as System Settings / Roles & Permissions --}}
+{{-- resources/views/components/leave/banner.blade.php --}}
 @props(['title', 'subtitle' => null, 'icon' => 'bi-calendar2-check'])
 
-<div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-8 border px-6 py-6 bg-gradient-to-r from-purple-500 to-pink-600 rounded-lg">
-    <div class="flex items-center gap-4">
-        <div class="flex-shrink-0">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-indigo-100 to-purple-100 flex items-center justify-center">
-                <i class="bi {{ $icon }} text-3xl text-indigo-600"></i>
-            </div>
-        </div>
-        <div>
-            <h1 class="text-3xl font-bold text-white">{{ $title }}</h1>
+<div {{ $attributes->merge([
+        'class' => 'mb-6 flex flex-col gap-4 overflow-hidden rounded-xl text-blue-100 shadow-sm sm:flex-row sm:items-center sm:justify-between',
+    ]) }}
+     style="background-image: linear-gradient(to bottom right, #0a2463, #06173f);">
+    <div class="flex items-center gap-4 p-6">
+        <span class="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-white/10 ring-1 ring-white/20">
+            <i class="bi {{ $icon }} text-3xl text-white" aria-hidden="true"></i>
+        </span>
+        <div class="min-w-0">
+            <h1 class="text-2xl font-semibold text-white sm:text-3xl">{{ $title }}</h1>
             @if ($subtitle)
-                <p class="text-sm text-gray-100 mt-1">{{ $subtitle }}</p>
+                <p class="mt-1 text-sm text-blue-200">{{ $subtitle }}</p>
             @endif
         </div>
     </div>
     @isset($actions)
-        <div class="flex flex-wrap items-center gap-2">{{ $actions }}</div>
+        <div class="flex flex-wrap items-center gap-2 px-6 pb-6 sm:pb-0 sm:pr-6">{{ $actions }}</div>
     @endisset
 </div>

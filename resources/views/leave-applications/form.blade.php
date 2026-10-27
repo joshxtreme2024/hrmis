@@ -9,7 +9,7 @@
     </li>
     <li class="flex items-center">
         <i class="bi bi-chevron-right text-gray-300 dark:text-gray-600 mx-2 text-xs"></i>
-        <span class="text-gray-800 dark:text-gray-200 font-medium">Leave Applications</span>
+        <span class="text-gray-800 dark:text-gray-200 font-medium"><a href="{{ route('leave-applications.index') }}" class="hover:text-indigo-600">Leave Applications</a></span>
     </li>
     <li class="flex items-center">
         <i class="bi bi-chevron-right text-gray-300 dark:text-gray-600 mx-2 text-xs"></i>

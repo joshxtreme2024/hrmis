@@ -1,8 +1,11 @@
+{{-- Employee self-service: apply for / edit own leave (CS Form No. 6, sections 6.A-6.D) --}}
 @extends('layouts.app')
+
+@section('title', 'Apply for Leave')
 @section('breadcrumbs')
     <li class="flex items-center">
         <i class="bi bi-chevron-right text-gray-300 dark:text-gray-600 mx-2 text-xs"></i>
-        <span class="text-gray-800 dark:text-gray-200 font-medium"><a href="{{ route('my-leaves.index') }}">My Leaves</a></span>
+        <span class="text-gray-800 dark:text-gray-200 font-medium"><a href="{{ route('my-leaves.index') }}" class="hover:text-indigo-600">My Leaves</a></span>
     </li>
     <li class="flex items-center">
         <i class="bi bi-chevron-right text-gray-300 dark:text-gray-600 mx-2 text-xs"></i>
@@ -16,15 +19,18 @@
         $v = old($key, data_get($application, $key, $default));
         return $v instanceof \Carbon\CarbonInterface ? $v->format('Y-m-d') : $v;
     };
-    $inp = 'w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm focus:border-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100';
-    $lbl = 'mb-1.5 block text-sm font-medium text-gray-800 dark:text-gray-200';
-    $card = 'rounded-xl border border-gray-200 bg-white p-6 dark:border-gray-800 dark:bg-gray-900';
-    $h = 'mb-4 text-base font-bold text-blue-900 dark:text-blue-200';
+    $inp = 'w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 dark:bg-gray-700 dark:text-white transition-colors';
+    $lbl = 'block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1';
+    $card = 'bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden p-6';
+    $h = '-mx-6 -mt-6 mb-6 px-6 py-4 border-b border-gray-200 dark:border-gray-700 text-lg font-semibold text-gray-900 dark:text-white';
 @endphp
-<div class="mx-auto max-w-4xl px-4 py-8">
-    <a href="{{ route('my-leaves.index') }}" class="text-sm text-blue-700 hover:underline dark:text-blue-400"><i class="bi bi-arrow-left"></i> Back to my leaves</a>
-    <h1 class="mt-2 text-2xl font-bold text-blue-900 dark:text-white">{{ $editing ? 'Edit leave application' : 'Apply for leave' }}</h1>
-    <p class="text-sm text-gray-600 dark:text-gray-400">Application for Leave — CS Form No. 6, Revised 2020</p>
+<div class="py-6">
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+    <x-leave.banner :title="$editing ? 'Edit leave application' : 'Apply for leave'" icon="bi-file-earmark-text" subtitle="Application for Leave — CS Form No. 6, Revised 2020">
+        <x-slot:actions>
+            <x-leave.banner-action :href="route('my-leaves.index')" icon="bi-arrow-left">Back</x-leave.banner-action>
+        </x-slot:actions>
+    </x-leave.banner>
 
     @if ($errors->any())
         <div class="mt-6 rounded-lg border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-800" role="alert">
@@ -39,7 +45,7 @@
 
         {{-- Applicant (read-only, taken from your employee record) --}}
         <section class="{{ $card }}">
-            <h2 class="{{ $h }}">Applicant</h2>
+            <h2 class="{{ $h }}"><i class="bi bi-person-badge mr-2 text-indigo-600"></i>Applicant</h2>
             <dl class="grid grid-cols-[9rem_1fr] gap-x-4 gap-y-2 text-sm">
                 <dt class="text-gray-500">Name</dt><dd class="font-medium">{{ \App\Support\EmployeeProfile::name($employee) }}</dd>
                 <dt class="text-gray-500">Office/Department</dt><dd>{{ $department?->name ?? '—' }}</dd>
@@ -57,7 +63,7 @@
 
         {{-- 6.A Type of leave --}}
         <section class="{{ $card }}">
-            <h2 class="{{ $h }}">6.A Type of leave to be availed of</h2>
+            <h2 class="{{ $h }}"><i class="bi bi-tags mr-2 text-indigo-600"></i>6.A Type of leave to be availed of</h2>
             <label for="leave_type_id" class="sr-only">Leave type</label>
             <select id="leave_type_id" name="leave_type_id" required class="{{ $inp }}">
                 <option value="">Select leave type…</option>
@@ -73,15 +79,15 @@
 
         {{-- 6.B Details --}}
         <section class="{{ $card }}">
-            <h2 class="{{ $h }}">6.B Details of leave</h2>
+            <h2 class="{{ $h }}"><i class="bi bi-card-checklist mr-2 text-indigo-600"></i>6.B Details of leave</h2>
             <p id="noDetails" class="text-sm text-gray-500">Select a leave type to see its details.</p>
 
             <div class="space-y-5">
                 <fieldset data-show-for="VL,SPL">
                     <legend class="{{ $lbl }}">In case of Vacation / Special Privilege Leave</legend>
                     <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm dark:text-gray-200">
-                        <label class="flex items-center gap-2"><input type="radio" name="vacation_location" value="within_philippines" class="accent-blue-700" @checked($val('vacation_location') === 'within_philippines')> Within the Philippines</label>
-                        <label class="flex items-center gap-2"><input type="radio" name="vacation_location" value="abroad" class="accent-blue-700" @checked($val('vacation_location') === 'abroad')> Abroad</label>
+                        <label class="flex items-center gap-2"><input type="radio" name="vacation_location" value="within_philippines" class="accent-indigo-600" @checked($val('vacation_location') === 'within_philippines')> Within the Philippines</label>
+                        <label class="flex items-center gap-2"><input type="radio" name="vacation_location" value="abroad" class="accent-indigo-600" @checked($val('vacation_location') === 'abroad')> Abroad</label>
                     </div>
                     <input name="vacation_location_specify" type="text" placeholder="Specify place / country" value="{{ $val('vacation_location_specify') }}" class="{{ $inp }} mt-3">
                 </fieldset>
@@ -89,8 +95,8 @@
                 <fieldset data-show-for="SL">
                     <legend class="{{ $lbl }}">In case of Sick Leave</legend>
                     <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm dark:text-gray-200">
-                        <label class="flex items-center gap-2"><input type="radio" name="sick_setting" value="in_hospital" class="accent-blue-700" @checked($val('sick_setting') === 'in_hospital')> In hospital</label>
-                        <label class="flex items-center gap-2"><input type="radio" name="sick_setting" value="out_patient" class="accent-blue-700" @checked($val('sick_setting') === 'out_patient')> Out patient</label>
+                        <label class="flex items-center gap-2"><input type="radio" name="sick_setting" value="in_hospital" class="accent-indigo-600" @checked($val('sick_setting') === 'in_hospital')> In hospital</label>
+                        <label class="flex items-center gap-2"><input type="radio" name="sick_setting" value="out_patient" class="accent-indigo-600" @checked($val('sick_setting') === 'out_patient')> Out patient</label>
                     </div>
                 </fieldset>
 
@@ -102,17 +108,17 @@
                 <fieldset data-show-for="STUDY">
                     <legend class="{{ $lbl }}">In case of Study Leave</legend>
                     <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm dark:text-gray-200">
-                        <label class="flex items-center gap-2"><input type="radio" name="study_purpose" value="masters_degree" class="accent-blue-700" @checked($val('study_purpose') === 'masters_degree')> Completion of Master's Degree</label>
-                        <label class="flex items-center gap-2"><input type="radio" name="study_purpose" value="bar_board_review" class="accent-blue-700" @checked($val('study_purpose') === 'bar_board_review')> BAR/Board Examination Review</label>
+                        <label class="flex items-center gap-2"><input type="radio" name="study_purpose" value="masters_degree" class="accent-indigo-600" @checked($val('study_purpose') === 'masters_degree')> Completion of Master's Degree</label>
+                        <label class="flex items-center gap-2"><input type="radio" name="study_purpose" value="bar_board_review" class="accent-indigo-600" @checked($val('study_purpose') === 'bar_board_review')> BAR/Board Examination Review</label>
                     </div>
                 </fieldset>
 
                 <fieldset data-show-for="*">
                     <legend class="{{ $lbl }}">Other purpose <span class="font-normal text-gray-500">(optional)</span></legend>
                     <div class="flex flex-wrap gap-x-6 gap-y-2 text-sm dark:text-gray-200">
-                        <label class="flex items-center gap-2"><input type="radio" name="other_purpose" value="" class="accent-blue-700" @checked(! $val('other_purpose'))> None</label>
-                        <label class="flex items-center gap-2"><input type="radio" name="other_purpose" value="monetization" class="accent-blue-700" @checked($val('other_purpose') === 'monetization')> Monetization of Leave Credits</label>
-                        <label class="flex items-center gap-2"><input type="radio" name="other_purpose" value="terminal_leave" class="accent-blue-700" @checked($val('other_purpose') === 'terminal_leave')> Terminal Leave</label>
+                        <label class="flex items-center gap-2"><input type="radio" name="other_purpose" value="" class="accent-indigo-600" @checked(! $val('other_purpose'))> None</label>
+                        <label class="flex items-center gap-2"><input type="radio" name="other_purpose" value="monetization" class="accent-indigo-600" @checked($val('other_purpose') === 'monetization')> Monetization of Leave Credits</label>
+                        <label class="flex items-center gap-2"><input type="radio" name="other_purpose" value="terminal_leave" class="accent-indigo-600" @checked($val('other_purpose') === 'terminal_leave')> Terminal Leave</label>
                     </div>
                 </fieldset>
             </div>
@@ -120,7 +126,7 @@
 
         {{-- 6.C / 6.D --}}
         <section class="{{ $card }}">
-            <h2 class="{{ $h }}">6.C Working days &amp; inclusive dates</h2>
+            <h2 class="{{ $h }}"><i class="bi bi-calendar-range mr-2 text-indigo-600"></i>6.C Working days &amp; inclusive dates</h2>
             <div class="grid gap-4 sm:grid-cols-3">
                 <div>
                     <label for="date_from" class="{{ $lbl }}">From</label>
@@ -139,18 +145,19 @@
         </section>
 
         <section class="{{ $card }}">
-            <h2 class="{{ $h }}">6.D Commutation</h2>
-            <label class="mt-5 flex items-center gap-2 text-sm dark:text-gray-200">
-                <input type="checkbox" name="commutation_requested" value="1" class="h-4 w-4 rounded accent-blue-700" @checked($val('commutation_requested'))>
+            <h2 class="{{ $h }}"><i class="bi bi-arrow-left-right mr-2 text-indigo-600"></i>6.D Commutation</h2>
+            <label class="flex items-center gap-2 text-sm dark:text-gray-200">
+                <input type="checkbox" name="commutation_requested" value="1" class="h-4 w-4 rounded accent-indigo-600" @checked($val('commutation_requested'))>
                 Commutation requested (leave unchecked for “Not Requested”)
             </label>
         </section>
 
         <div class="flex justify-end gap-3">
             <a href="{{ route('my-leaves.index') }}" class="rounded-lg border border-gray-300 px-5 py-2.5 text-sm font-medium hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">Cancel</a>
-            <button type="submit" class="rounded-lg bg-blue-700 px-6 py-2.5 text-sm font-semibold text-white hover:bg-blue-600">{{ $editing ? 'Save changes' : 'Submit application' }}</button>
+            <button type="submit" class="rounded-lg bg-gradient-to-r from-indigo-600 to-indigo-700 px-6 py-2.5 text-sm font-semibold text-white hover:from-indigo-700 hover:to-indigo-800">{{ $editing ? 'Save changes' : 'Submit application' }}</button>
         </div>
     </form>
+</div>
 </div>
 
 <script>

@@ -159,4 +159,18 @@ class MyLeaveController extends LeaveApplicationController
 
         return parent::cancel($leaveApplication);
     }
+
+    /** Printable CS Form No. 6 for an approved application. */
+    public function printForm(LeaveApplication $leaveApplication)
+    {
+        $a = $this->owned($leaveApplication);
+        abort_unless($a->status === 'approved', 403, 'Only approved applications can be printed.');
+
+        $employee = $this->employee();
+
+        return view('my-leaves.print', [
+            'a'     => $a->load(['department', 'leaveType']),
+            'name'  => EmployeeProfile::nameParts($employee),
+        ]);
+    }
 }

@@ -1,556 +1,270 @@
 @extends('layouts.app')
 
 @section('title', 'Employee Management')
+@section('header', 'Employee Management')
+@section('subheader', 'Find employees, review their status and manage separations')
+
+@php
+    use Illuminate\Support\Facades\Route;
+
+    $btnPrimary = 'inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700';
+    $btnGhost   = 'inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700';
+    $field      = 'w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 focus:border-indigo-500 focus:ring-indigo-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white';
+    $label      = 'mb-1 block text-sm font-medium text-gray-700 dark:text-gray-200';
+    $statusLabels = ['active' => 'Active', 'inactive' => 'Inactive', 'on_leave' => 'On leave', 'resigned' => 'Resigned', 'retired' => 'Retired', 'suspended' => 'Suspended', 'terminated' => 'Terminated'];
+    $hasFilters = collect(['search', 'department', 'status', 'position'])->contains(fn ($k) => filled(request($k)));
+    $addUrl = Route::has('employees.create') ? route('employees.create') : null;
+@endphp
+
+@section('header-actions')
+    @if($addUrl)
+        <a href="{{ $addUrl }}" class="{{ $btnPrimary }}"><i class="bi bi-person-plus"></i> Add employee</a>
+    @endif
+    <button type="button" onclick="window.print()" class="{{ $btnGhost }}"><i class="bi bi-printer"></i> Print list</button>
+@endsection
+
 @section('breadcrumbs')
     <li class="flex items-center">
-        <i class="bi bi-chevron-right text-gray-300 dark:text-gray-600 mx-2 text-xs"></i>
-        <span class="text-gray-800 dark:text-gray-200 font-medium">Employee Management</span>
+        <i class="bi bi-chevron-right mx-2 text-xs text-gray-300 dark:text-gray-600"></i>
+        <span class="font-medium text-gray-800 dark:text-gray-200">Employee management</span>
     </li>
 @endsection
 
-@section('page-header')
-    <div class="flex items-center justify-between py-4 px-6 bg-white border-b border-gray-200">
-        <div>
-            <h1 class="text-2xl font-bold text-gray-800">Employee Management</h1>
-            <ol class="flex items-center space-x-2 text-sm text-gray-500 mt-1">
-                <li><a href="{{ route('dashboard') }}" class="hover:text-blue-600">Dashboard</a></li>
-                <li><span class="text-gray-300">/</span></li>
-                <li class="text-gray-700 font-medium">Employee Management</li>
-            </ol>
-        </div>
-        <div class="flex gap-2">
-            <button class="btn btn-primary bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-colors" 
-                    data-bs-toggle="modal" data-bs-target="#addEmployeeModal">
-                <i class="fas fa-user-plus"></i>
-                <span>Add New Employee</span>
-            </button>
-            <button class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors" 
-                    onclick="window.print()">
-                <i class="fas fa-print"></i>
-                <span>Export</span>
-            </button>
-        </div>
-    </div>
-@endsection
-
 @section('content')
-    <div class="p-6">
-        <!-- Filters and Search -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
-            <div class="p-4">
-                <form action="{{ route('employees.index') }}" method="GET" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 items-end">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Search</label>
-                        <div class="relative">
-                            <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-gray-400">
-                                <i class="fas fa-search"></i>
-                            </span>
-                            <input type="text" name="search" 
-                                class="w-full pl-10 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" 
-                                placeholder="Name, Email, ID..." 
-                                value="{{ request('search') }}">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Department</label>
-                        <select name="department" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">All Departments</option>
-                            @foreach($departments as $department)
-                                <option value="{{ $department->id }}" 
-                                    {{ request('department') == $department->id ? 'selected' : '' }}>
-                                    {{ $department->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Employment Status</label>
-                        <select name="status" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">All Status</option>
-                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
-                            <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                            <option value="on_leave" {{ request('status') == 'on_leave' ? 'selected' : '' }}>On Leave</option>
-                            <option value="resigned" {{ request('status') == 'resigned' ? 'selected' : '' }}>Resigned</option>
-                            <option value="retired" {{ request('status') == 'retired' ? 'selected' : '' }}>Retired</option>
-                            <option value="suspended" {{ request('status') == 'suspended' ? 'selected' : '' }}>Suspended</option>
-                            <option value="terminated" {{ request('status') == 'terminated' ? 'selected' : '' }}>Terminated</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Position</label>
-                        <select name="position" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">All Positions</option>
-                            @foreach($positions as $position)
-                                <option value="{{ $position->id }}" 
-                                    {{ request('position') == $position->id ? 'selected' : '' }}>
-                                    {{ $position->title }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Quick Actions</label>
-                        <div class="flex gap-2">
-                            <button type="submit" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
-                                <i class="fas fa-filter"></i>
-                                <span>Apply</span>
-                            </button>
-                            <a href="{{ route('employees.index') }}" class="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
-                                <i class="fas fa-undo"></i>
-                                <span>Reset</span>
-                            </a>
-                        </div>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Employee Statistics Cards -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div class="bg-white rounded-lg shadow-sm border-l-4 border-blue-500 p-4">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h6 class="text-xs font-medium text-gray-500 uppercase tracking-wider">Total Employees</h6>
-                        <h2 class="text-2xl font-bold text-gray-800 mt-1">{{ $stats['total'] ?? 0 }}</h2>
-                    </div>
-                    <div class="text-blue-500 opacity-50">
-                        <i class="fas fa-users fa-2x"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm border-l-4 border-green-500 p-4">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h6 class="text-xs font-medium text-gray-500 uppercase tracking-wider">Active</h6>
-                        <h2 class="text-2xl font-bold text-gray-800 mt-1">{{ $stats['active'] ?? 0 }}</h2>
-                    </div>
-                    <div class="text-green-500 opacity-50">
-                        <i class="fas fa-user-check fa-2x"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm border-l-4 border-yellow-500 p-4">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h6 class="text-xs font-medium text-gray-500 uppercase tracking-wider">On Leave</h6>
-                        <h2 class="text-2xl font-bold text-gray-800 mt-1">{{ $stats['on_leave'] ?? 0 }}</h2>
-                    </div>
-                    <div class="text-yellow-500 opacity-50">
-                        <i class="fas fa-user-clock fa-2x"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm border-l-4 border-red-500 p-4">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h6 class="text-xs font-medium text-gray-500 uppercase tracking-wider">New This Month</h6>
-                        <h2 class="text-2xl font-bold text-gray-800 mt-1">{{ $stats['new_this_month'] ?? 0 }}</h2>
-                    </div>
-                    <div class="text-red-500 opacity-50">
-                        <i class="fas fa-user-plus fa-2x"></i>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Employee Table -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200">
-            <div class="flex justify-between items-center p-4 border-b border-gray-200">
-                <h5 class="text-lg font-semibold text-gray-800">Employee List</h5>
-                <div class="flex items-center gap-2">
-                    <span class="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm font-medium">
-                        {{ $employees->total() ?? 0 }} Employees
-                    </span>
-                    <div class="relative inline-block">
-                        <button class="dropdown-trigger bg-gray-200 hover:bg-gray-300 text-gray-700 px-3 py-1 rounded-lg text-sm flex items-center gap-1 transition-colors">
-                            <i class="fas fa-file-export"></i>
-                            <span>Export</span>
-                            <i class="fas fa-chevron-down text-xs"></i>
-                        </button>
-                        <ul class="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10 hidden">
-                            <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" href="#"><i class="fas fa-file-pdf mr-2"></i>PDF</a></li>
-                            <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" href="#"><i class="fas fa-file-excel mr-2"></i>Excel</a></li>
-                            <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" href="#"><i class="fas fa-file-csv mr-2"></i>CSV</a></li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="overflow-x-auto">
-                <table class="w-full">
-                    <thead class="bg-gray-50 border-b border-gray-200">
-                        <tr>
-                            <th class="w-12 px-4 py-3">
-                                <input type="checkbox" id="selectAll" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                            </th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Employee</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Position</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Hired</th>
-                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200">
-                        @forelse($employees as $employee)
-                            <tr class="hover:bg-blue-50 transition-colors">
-                                <td class="px-4 py-3">
-                                    <input type="checkbox" class="rounded border-gray-300 text-blue-600 focus:ring-blue-500 employee-checkbox" 
-                                           value="{{ $employee->id }}">
-                                </td>
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-10 w-10 mr-3">
-                                            @if($employee->profile_picture)
-                                                <img src="{{ asset('storage/' . $employee->profile_picture) }}" 
-                                                     alt="{{ $employee->getDisplayNameAttribute() }}" 
-                                                     class="h-10 w-10 rounded-full object-cover">
-                                            @else
-                                                <div class="h-10 w-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-semibold text-sm">
-                                                    @php
-                                                        $firstName = $employee->personalData?->first_name ?? '';
-                                                        $lastName = $employee->personalData?->last_name ?? '';
-                                                        $initials = strtoupper(substr($firstName, 0, 1) . substr($lastName, 0, 1));
-                                                    @endphp
-                                                    {{ $initials ?: '?' }}
-                                                </div>
-                                            @endif
-                                        </div>
-                                        <div>
-                                            <a href="{{ route('employees.showProfile', $employee) }}">
-                                                <div class="font-medium text-gray-900">{{ $employee->display_name }}</div>
-                                                <div class="text-sm text-gray-500">{{ $employee->email }}</div>
-                                                @if($employee->employment?->employee_id)
-                                                    <div class="text-xs text-gray-400">ID: {{ $employee->employment->employee_id }}</div>
-                                                @endif
-                                            </a>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 py-3 text-sm text-gray-700">{{ $employee->employment->department->name ?? 'N/A' }}</td>
-                                <td class="px-4 py-3 text-sm text-gray-700">{{ $employee->employment->position->title ?? 'N/A' }}<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs {{ $employee->employment?->employment_type_color ?? 'bg-gray-100 text-gray-800' }}">{{ $employee->employment->employment_type_label ?? '' }}</span></td>
-                                <td class="px-4 py-3">
-                                    @if($employee->employment)
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $employee->employment->status_badge }}">
-                                            {{ $employee->employment->status_label }}
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
-                                            N/A
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="px-4 py-3 text-sm text-gray-700">
-                                    {{ $employee->employment->formatted_hire_date ?? 'N/A' }}
-                                </td>
-                                <td class="px-4 py-3">
-                                    <div class="flex items-center gap-1">
-                                        <div class="relative inline-block">
-                                            <button class="dropdown-trigger p-1.5 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors">
-                                                <i class="fas fa-ellipsis-v"></i>
-                                            </button>
-                                            <ul class="dropdown-menu absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10 hidden">
-                                                <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" href="{{ route('employees.showProfile', $employee) }}"><i class="fa-solid fa-user mr-2"></i>View Profile</a></li>
-                                                <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" href="{{ route('dashboard') }}"><i class="fas fa-file-contract mr-2"></i>View Contract</a></li>
-                                                <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" href="#"><i class="fas fa-clock mr-2"></i>Attendance</a></li>
-                                                <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" href="#"><i class="fas fa-calendar-alt mr-2"></i>Leave History</a></li>
-                                                <li><a class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors" href="#"><i class="fas fa-tasks mr-2"></i>Performance</a></li>
-                                                <li><hr class="my-1 border-gray-200"></li>
-                                                <li>
-                                                    @if($employee->employment?->status != 'terminated')
-                                                        <button type="button" 
-                                                                onclick="event.stopPropagation(); openTerminateModal({{ $employee->id }}, '{{ addslashes($employee->display_name) }}')"
-                                                                class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors flex items-center">
-                                                            <i class="bi bi-person-x mr-2"></i>
-                                                            Terminate Employee
-                                                        </button>
-                                                    @else
-                                                        <form action="{{ route('employees.termination.cancel', $employee) }}" method="POST">
-                                                            @csrf
-                                                            @method('PATCH')
-                                                            <button type="submit" 
-                                                                    onclick="return confirm('⚠️ Are you sure you want to reactivate employment status?\n\nThis action will:\n• Reactivate the employee account\n• Update employment status to active')"
-                                                                    class="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-50 transition-colors flex items-center">
-                                                                <i class="bi bi-arrow-counterclockwise mr-2"></i>
-                                                                Reactivate Employment
-                                                            </button>
-                                                        </form>
-                                                    @endif
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                        @empty
-                            <tr>
-                                <td colspan="7" class="px-4 py-12 text-center">
-                                    <i class="fas fa-users text-4xl text-gray-300 mb-3 block mx-auto" style="width: fit-content;"></i>
-                                    <h5 class="text-lg font-medium text-gray-500">No employees found</h5>
-                                    <p class="text-sm text-gray-400 mt-1">Try adjusting your filters or add a new employee.</p>
-                                </td>
-                            </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-            <div class="flex flex-col sm:flex-row justify-between items-center p-4 border-t border-gray-200">
-                <div class="text-sm text-gray-600 mb-2 sm:mb-0">
-                    Showing {{ $employees->firstItem() ?? 0 }} to {{ $employees->lastItem() ?? 0 }} 
-                    of {{ $employees->total() ?? 0 }} employees
-                </div>
-                <div>
-                    {{ $employees->links() ?? '' }}
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Terminate Modal - Moved OUTSIDE the table -->
-    <div id="terminateModal" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9999] hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full max-h-[90vh] overflow-y-auto">
-            <form action="" method="POST" id="terminateForm">
-                @csrf
-                <div class="px-6 py-5 border-b border-gray-100">
-                    <div class="flex items-center justify-between">
-                        <h5 class="text-red-600 text-xl font-bold">
-                            <i class="bi bi-exclamation-triangle mr-2"></i>
-                            Terminate Employee
-                        </h5>
-                        <button type="button" class="text-gray-400 hover:text-gray-600 transition-colors text-2xl leading-none" onclick="closeTerminateModal()">
-                            ×
-                        </button>
-                    </div>
-                </div>
-                <div class="px-6 py-4">
-                    <div class="bg-red-50 border border-red-200 rounded-xl p-4 mb-6">
-                        <div class="flex items-start">
-                            <i class="bi bi-info-circle text-red-500 mr-2 mt-0.5"></i>
-                            <div>
-                                <p class="text-sm text-red-800 font-medium">
-                                    <strong>Warning:</strong> You are about to terminate <strong id="employeeNameDisplay"></strong>.
-                                </p>
-                                <p class="text-xs text-red-600 mt-1">This action will permanently deactivate their account and remove access to the system.</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="space-y-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Termination Date <span class="text-red-500">*</span></label>
-                            <input type="date" name="termination_date" id="termination_date" 
-                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200" 
-                                required>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Reason for Termination <span class="text-red-500">*</span></label>
-                            <select name="termination_reason" id="termination_reason" 
-                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200" 
-                                    required>
-                                <option value="">Select reason...</option>
-                                <option value="resignation">Resignation</option>
-                                <option value="retirement">Retirement</option>
-                                <option value="death">Death</option>
-                                <option value="dismissal">Dismissal</option>
-                                <option value="drop_from_roll">Drop From the Roll</option>
-                                <option value="end_of_term">End of Term</option>
-                                <option value="laid_off">Laid Off</option>
-                                <option value="separation">Separation</option>
-                                <option value="termination">Termination</option>
-                                <option value="other">Other</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-gray-700 mb-1.5">Additional Details</label>
-                            <textarea name="termination_details" id="termination_details" rows="3" 
-                                    class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-all duration-200"
-                                    placeholder="Provide additional details about the termination..."></textarea>
-                        </div>
-                    </div>
-                </div>
-                <div class="px-6 py-5 border-t border-gray-100 flex justify-end gap-3">
-                    <button type="button" class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-all duration-200" onclick="closeTerminateModal()">
-                        Cancel
-                    </button>
-                    <button type="submit" class="px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-all duration-200 hover:shadow-lg">
-                        <i class="bi bi-person-x mr-2"></i>
-                        Terminate Employee
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-@endsection
-
-@push('styles')
 <style>
-    .badge {
-        @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
-    }
-    
-    .hover\:bg-blue-50:hover {
-        background-color: #eff6ff;
-    }
-    
-    .overflow-x-auto::-webkit-scrollbar {
-        height: 6px;
-    }
-    
-    .overflow-x-auto::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 3px;
-    }
-    
-    .overflow-x-auto::-webkit-scrollbar-thumb {
-        background: #c1c1c1;
-        border-radius: 3px;
-    }
-    
-    .overflow-x-auto::-webkit-scrollbar-thumb:hover {
-        background: #a8a8a8;
-    }
+    :is(a, button, input, select, textarea, summary):focus-visible { outline: 2px solid #6366f1; outline-offset: 2px; }
+    #terminateModal::backdrop { background: rgb(17 24 39 / .6); }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
 </style>
-@endpush
+
+<div class="space-y-6 p-6">
+
+    {{-- ===== Key numbers (click to filter) ===== --}}
+    <section class="grid grid-cols-2 gap-4 lg:grid-cols-4" aria-label="Summary">
+        @foreach([
+            ['Total employees', $stats['total'] ?? 0, route('employees.index'), 'text-gray-900 dark:text-white'],
+            ['Active', $stats['active'] ?? 0, route('employees.index', ['status' => 'active']), 'text-emerald-600 dark:text-emerald-400'],
+            ['On leave', $stats['on_leave'] ?? 0, route('employees.index', ['status' => 'on_leave']), 'text-amber-600 dark:text-amber-400'],
+            ['New this month', $stats['new_this_month'] ?? 0, null, 'text-indigo-600 dark:text-indigo-400'],
+        ] as [$name, $value, $url, $color])
+            @php $tag = $url ? 'a' : 'div'; @endphp
+            <{{ $tag }} @if($url) href="{{ $url }}" @endif class="rounded-xl border border-gray-200 bg-white p-5 shadow-sm dark:border-gray-700 dark:bg-gray-800 {{ $url ? 'hover:border-indigo-300 dark:hover:border-indigo-700' : '' }}">
+                <p class="text-sm text-gray-600 dark:text-gray-400">{{ $name }}</p>
+                <p class="mt-1 text-3xl font-semibold tabular-nums {{ $color }}">{{ $value }}</p>
+            </{{ $tag }}>
+        @endforeach
+    </section>
+
+    {{-- ===== Filters ===== --}}
+    <form id="filterForm" action="{{ route('employees.index') }}" method="GET" role="search" aria-label="Filter employees"
+          class="grid gap-4 rounded-xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 sm:grid-cols-2 lg:grid-cols-4 print:hidden">
+        <div>
+            <label for="search" class="{{ $label }}">Search</label>
+            <div class="relative">
+                <i class="bi bi-search pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true"></i>
+                <input id="search" type="search" name="search" value="{{ request('search') }}" placeholder="Name, email or employee ID" class="{{ $field }} pl-9">
+            </div>
+        </div>
+        <div>
+            <label for="department" class="{{ $label }}">Department</label>
+            <select id="department" name="department" class="{{ $field }}">
+                <option value="">All departments</option>
+                @foreach($departments as $department)
+                    <option value="{{ $department->id }}" @selected(request('department') == $department->id)>{{ $department->name }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label for="status" class="{{ $label }}">Employment status</label>
+            <select id="status" name="status" class="{{ $field }}">
+                <option value="">All statuses</option>
+                @foreach($statusLabels as $value => $text)
+                    <option value="{{ $value }}" @selected(request('status') == $value)>{{ $text }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <label for="position" class="{{ $label }}">Position</label>
+            <select id="position" name="position" class="{{ $field }}">
+                <option value="">All positions</option>
+                @foreach($positions as $position)
+                    <option value="{{ $position->id }}" @selected(request('position') == $position->id)>{{ $position->title }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div class="flex items-center gap-3 sm:col-span-2 lg:col-span-4">
+            <button type="submit" class="{{ $btnPrimary }}"><i class="bi bi-funnel"></i> Apply filters</button>
+            @if($hasFilters)
+                <a href="{{ route('employees.index') }}" class="text-sm font-medium text-indigo-600 hover:underline dark:text-indigo-400">Clear all filters</a>
+            @endif
+        </div>
+    </form>
+
+    {{-- ===== Employee table ===== --}}
+    <section class="overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800" aria-label="Employee list">
+        <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+            <h2 class="text-base font-semibold text-gray-900 dark:text-white">Employees</h2>
+            <p class="text-sm text-gray-600 dark:text-gray-400" role="status">
+                {{ $employees->total() }} {{ \Illuminate\Support\Str::plural('result', $employees->total()) }}{{ $hasFilters ? ' for your filters' : '' }}
+            </p>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200 text-sm dark:divide-gray-700">
+                <caption class="sr-only">Employees with department, position, status and date hired</caption>
+                <thead class="bg-gray-50 dark:bg-gray-900/30">
+                    <tr class="text-left text-gray-600 dark:text-gray-400">
+                        <th scope="col" class="px-4 py-3 font-medium">Employee</th>
+                        <th scope="col" class="px-4 py-3 font-medium">Department</th>
+                        <th scope="col" class="px-4 py-3 font-medium">Position</th>
+                        <th scope="col" class="px-4 py-3 font-medium">Status</th>
+                        <th scope="col" class="px-4 py-3 font-medium">Date hired</th>
+                        <th scope="col" class="px-4 py-3 text-right font-medium print:hidden"><span class="sr-only">Actions</span></th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                    @forelse($employees as $employee)
+                        @php
+                            $emp = $employee->employment;
+                            $first = $employee->personalData?->first_name ?? '';
+                            $last = $employee->personalData?->last_name ?? '';
+                            $initials = strtoupper(substr($first, 0, 1) . substr($last, 0, 1)) ?: '?';
+                            $isTerminated = $emp?->status === 'terminated';
+                        @endphp
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/40">
+                            <td class="px-4 py-3">
+                                <a href="{{ route('employees.showProfile', $employee) }}" class="flex items-center gap-3">
+                                    @if($employee->profile_picture)
+                                        <img src="{{ asset('storage/' . $employee->profile_picture) }}" alt="" class="h-10 w-10 shrink-0 rounded-full object-cover">
+                                    @else
+                                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-50 text-sm font-semibold text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300" aria-hidden="true">{{ $initials }}</span>
+                                    @endif
+                                    <span class="min-w-0">
+                                        <span class="block font-medium text-gray-900 hover:text-indigo-600 dark:text-white dark:hover:text-indigo-400">{{ $employee->display_name }}</span>
+                                        <span class="block truncate text-gray-600 dark:text-gray-400">{{ $employee->email }}</span>
+                                        @if($emp?->employee_id)<span class="block text-xs text-gray-500 dark:text-gray-400">ID {{ $emp->employee_id }}</span>@endif
+                                    </span>
+                                </a>
+                            </td>
+                            <td class="px-4 py-3 text-gray-700 dark:text-gray-300">{{ $emp?->department->name ?? '—' }}</td>
+                            <td class="px-4 py-3 text-gray-700 dark:text-gray-300">
+                                {{ $emp?->position->title ?? '—' }}
+                                @if($emp?->employment_type_label)
+                                    <span class="mt-1 block"><span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium {{ $emp->employment_type_color ?? 'bg-gray-100 text-gray-800' }}">{{ $emp->employment_type_label }}</span></span>
+                                @endif
+                            </td>
+                            <td class="px-4 py-3">
+                                <span class="inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium {{ $emp ? $emp->status_badge : 'bg-gray-100 text-gray-800' }}">{{ $emp ? $emp->status_label : 'No record' }}</span>
+                            </td>
+                            <td class="whitespace-nowrap px-4 py-3 text-gray-700 dark:text-gray-300">{{ $emp?->formatted_hire_date ?? '—' }}</td>
+                            <td class="whitespace-nowrap px-4 py-3 text-right print:hidden">
+                                <a href="{{ route('employees.showProfile', $employee) }}" class="inline-flex rounded p-2 text-indigo-600 hover:bg-indigo-50 dark:text-indigo-400 dark:hover:bg-indigo-900/30" aria-label="View profile of {{ $employee->display_name }}" title="View profile"><i class="bi bi-person-lines-fill"></i></a>
+                                @if($emp)
+                                    @if(!$isTerminated)
+                                        <button type="button" onclick="openTerminate({{ $employee->id }}, @js($employee->display_name))" class="inline-flex rounded p-2 text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/30" aria-label="Terminate {{ $employee->display_name }}" title="Terminate employment"><i class="bi bi-person-x"></i></button>
+                                    @else
+                                        <button type="button" onclick="confirmReactivate('reactivate-{{ $employee->id }}', @js($employee->display_name))" class="inline-flex rounded p-2 text-emerald-700 hover:bg-emerald-50 dark:text-emerald-400 dark:hover:bg-emerald-900/30" aria-label="Reactivate {{ $employee->display_name }}" title="Reactivate employment"><i class="bi bi-arrow-counterclockwise"></i></button>
+                                        <form id="reactivate-{{ $employee->id }}" action="{{ route('employees.termination.cancel', $employee) }}" method="POST" class="hidden">@csrf @method('PATCH')</form>
+                                    @endif
+                                @endif
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="px-4 py-14 text-center">
+                                <i class="bi bi-people text-4xl text-gray-300 dark:text-gray-600" aria-hidden="true"></i>
+                                <p class="mt-2 font-medium text-gray-900 dark:text-white">{{ $hasFilters ? 'No employees match your filters' : 'No employees yet' }}</p>
+                                <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                                    {{ $hasFilters ? 'Try a different search word, or clear the filters.' : 'Employees will appear here once they are added.' }}
+                                </p>
+                                @if($hasFilters)<a href="{{ route('employees.index') }}" class="{{ $btnGhost }} mt-4">Clear all filters</a>@endif
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex flex-col items-center justify-between gap-3 border-t border-gray-200 px-6 py-4 dark:border-gray-700 sm:flex-row print:hidden">
+            <p class="text-sm text-gray-600 dark:text-gray-400">Showing {{ $employees->firstItem() ?? 0 }}–{{ $employees->lastItem() ?? 0 }} of {{ $employees->total() }}</p>
+            {{ $employees->withQueryString()->links() }}
+        </div>
+    </section>
+</div>
+
+{{-- ===== Terminate dialog ===== --}}
+<dialog id="terminateModal" class="m-auto w-full max-w-md rounded-xl bg-white p-0 text-gray-900 shadow-2xl dark:bg-gray-800 dark:text-white" aria-labelledby="terminateTitle">
+    <form id="terminateForm" method="POST">
+        @csrf
+        <div class="flex items-center justify-between border-b border-gray-200 px-6 py-4 dark:border-gray-700">
+            <h2 id="terminateTitle" class="text-lg font-semibold">Terminate employment</h2>
+            <button type="button" onclick="terminateModal.close()" class="rounded p-1 text-gray-500 hover:text-gray-900 dark:hover:text-white" aria-label="Close"><i class="bi bi-x-lg"></i></button>
+        </div>
+        <div class="space-y-4 px-6 py-5">
+            <div class="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800 dark:border-red-800 dark:bg-red-900/20 dark:text-red-300" role="alert">
+                You are ending the employment of <strong id="employeeNameDisplay"></strong>. Their account will lose access to the system. You can reactivate it later if this was a mistake.
+            </div>
+            <div>
+                <label for="termination_date" class="{{ $label }}">Termination date <span class="text-red-600" aria-hidden="true">*</span></label>
+                <input type="date" id="termination_date" name="termination_date" required class="{{ $field }}">
+            </div>
+            <div>
+                <label for="termination_reason" class="{{ $label }}">Reason <span class="text-red-600" aria-hidden="true">*</span></label>
+                <select id="termination_reason" name="termination_reason" required class="{{ $field }}">
+                    <option value="">Select a reason</option>
+                    @foreach(['resignation' => 'Resignation', 'retirement' => 'Retirement', 'death' => 'Death', 'dismissal' => 'Dismissal', 'drop_from_roll' => 'Dropped from the rolls', 'end_of_term' => 'End of term', 'laid_off' => 'Laid off', 'separation' => 'Separation', 'termination' => 'Termination', 'other' => 'Other'] as $v => $t)
+                        <option value="{{ $v }}">{{ $t }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="termination_details" class="{{ $label }}">Details <span id="detailsReq" class="hidden text-red-600" aria-hidden="true">*</span></label>
+                <textarea id="termination_details" name="termination_details" rows="3" class="{{ $field }}" placeholder="Add any notes for the record"></textarea>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Required when the reason is “Other”.</p>
+            </div>
+        </div>
+        <div class="flex justify-end gap-3 border-t border-gray-200 px-6 py-4 dark:border-gray-700">
+            <button type="button" onclick="terminateModal.close()" class="{{ $btnGhost }}">Cancel</button>
+            <button type="submit" class="inline-flex items-center gap-2 rounded-lg bg-red-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-red-700"><i class="bi bi-person-x"></i> Terminate employment</button>
+        </div>
+    </form>
+</dialog>
+@endsection
 
 @push('scripts')
 <script>
-// Wait for DOM to be fully loaded
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded - setting up dropdowns');
-    
-    // Dropdown functionality
-    document.querySelectorAll('.dropdown-trigger').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.stopPropagation();
-            e.preventDefault();
-            const dropdown = this.nextElementSibling;
-            const isHidden = dropdown.classList.contains('hidden');
-            
-            // Close all other open dropdowns
-            document.querySelectorAll('.dropdown-menu').forEach(d => {
-                if (d !== dropdown) d.classList.add('hidden');
-            });
-            
-            // Toggle this dropdown
-            if (isHidden) {
-                dropdown.classList.remove('hidden');
-            } else {
-                dropdown.classList.add('hidden');
-            }
-        });
-    });
+const terminateModal = document.getElementById('terminateModal'),
+      terminateForm = document.getElementById('terminateForm'),
+      reasonSel = document.getElementById('termination_reason'),
+      detailsBox = document.getElementById('termination_details');
 
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', function(e) {
-        document.querySelectorAll('.dropdown-menu').forEach(dropdown => {
-            if (!dropdown.classList.contains('hidden') && !dropdown.closest('.relative').contains(e.target)) {
-                dropdown.classList.add('hidden');
-            }
-        });
-    });
-
-    // Select All checkbox
-    const selectAll = document.getElementById('selectAll');
-    if (selectAll) {
-        selectAll.addEventListener('change', function() {
-            document.querySelectorAll('.employee-checkbox').forEach(cb => {
-                cb.checked = this.checked;
-            });
-        });
-    }
-
-    // Confirm before termination - Attach to form
-    const terminateForm = document.getElementById('terminateForm');
-    if (terminateForm) {
-        terminateForm.addEventListener('submit', function(e) {
-            if (!confirm('⚠️ Are you sure you want to terminate this employee? This action cannot be undone.')) {
-                e.preventDefault();
-                return false;
-            }
-        });
-    }
-});
-
-// Global functions for modal - Make them truly global
-window.openTerminateModal = function(employeeId, employeeName) {
-    console.log('Opening modal for:', employeeId, employeeName);
-    
-    const modal = document.getElementById('terminateModal');
-    if (!modal) {
-        console.error('Modal not found!');
-        alert('Modal not found! Please check the page.');
-        return;
-    }
-    
-    // Close all dropdowns first
-    document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.add('hidden'));
-    
-    // Set employee name
-    const nameDisplay = document.getElementById('employeeNameDisplay');
-    if (nameDisplay) {
-        nameDisplay.textContent = employeeName;
-    }
-    
-    // Set form action
-    const form = document.getElementById('terminateForm');
-    if (form) {
-        form.action = 'employees/' + employeeId + '/terminate';
-        console.log('Form action set to:', form.action);
-    }
-    
-    // Reset form
-    const dateInput = document.getElementById('termination_date');
-    const reasonSelect = document.getElementById('termination_reason');
-    const detailsTextarea = document.getElementById('termination_details');
-    
-    if (dateInput) dateInput.value = '';
-    if (reasonSelect) reasonSelect.value = '';
-    if (detailsTextarea) detailsTextarea.value = '';
-    
-    // Show modal
-    modal.classList.remove('hidden');
-    modal.classList.add('flex');
-    document.body.style.overflow = 'hidden';
-    
-    console.log('Modal should now be visible');
-};
-
-window.closeTerminateModal = function() {
-    console.log('Closing modal');
-    const modal = document.getElementById('terminateModal');
-    if (modal) {
-        modal.classList.add('hidden');
-        modal.classList.remove('flex');
-        document.body.style.overflow = '';
-    }
-};
-
-// Close modal when clicking outside
-document.addEventListener('click', function(event) {
-    const modal = document.getElementById('terminateModal');
-    if (modal && !modal.classList.contains('hidden')) {
-        const modalContent = modal.querySelector('.bg-white');
-        if (modalContent && !modalContent.contains(event.target)) {
-            window.closeTerminateModal();
-        }
-    }
-});
-
-// Close modal with Escape key
-document.addEventListener('keydown', function(event) {
-    if (event.key === 'Escape') {
-        // Close dropdowns
-        document.querySelectorAll('.dropdown-menu').forEach(d => d.classList.add('hidden'));
-        // Close modal
-        window.closeTerminateModal();
-    }
-});
-
-// jQuery for backward compatibility (if jQuery is loaded)
-if (typeof $ !== 'undefined') {
-    $(document).ready(function() {
-        $('#selectAll').change(function() {
-            $('.employee-checkbox').prop('checked', $(this).prop('checked'));
-        });
-    });
+function openTerminate(id, name) {
+    terminateForm.reset();
+    terminateForm.action = `{{ url('employees') }}/${id}/terminate`;
+    document.getElementById('employeeNameDisplay').textContent = name;
+    document.getElementById('termination_date').value = new Date().toISOString().slice(0, 10);
+    detailsBox.required = false;
+    document.getElementById('detailsReq').classList.add('hidden');
+    terminateModal.showModal();
 }
+reasonSel.addEventListener('change', () => {
+    const other = reasonSel.value === 'other';
+    detailsBox.required = other;
+    document.getElementById('detailsReq').classList.toggle('hidden', !other);
+});
+terminateModal.addEventListener('click', e => { if (e.target === terminateModal) terminateModal.close(); });
+
+function confirmReactivate(formId, name) {
+    const text = `${name}'s account will be reactivated and their employment status set back to active.`;
+    const go = () => document.getElementById(formId).submit();
+    if (window.Swal) {
+        Swal.fire({ title: 'Reactivate employment?', text, icon: 'question', showCancelButton: true,
+            confirmButtonColor: '#059669', confirmButtonText: 'Reactivate', cancelButtonText: 'Cancel' })
+            .then(r => r.isConfirmed && go());
+    } else if (confirm(text)) { go(); }
+}
+
+// Dropdown filters apply as soon as you change them
+document.querySelectorAll('#filterForm select').forEach(s => s.addEventListener('change', () => s.form.submit()));
 </script>
 @endpush

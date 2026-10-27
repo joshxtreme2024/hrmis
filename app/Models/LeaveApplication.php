@@ -42,6 +42,7 @@ class LeaveApplication extends Model
     public function certifier()   { return $this->belongsTo(\App\Models\User::class, 'certified_by'); }
     public function recommender() { return $this->belongsTo(\App\Models\User::class, 'recommended_by'); }
     public function approver()    { return $this->belongsTo(\App\Models\User::class, 'approved_by'); }
+    public function user()        { return $this->belongsTo(User::class, 'emp_id'); }
 
     /* ---- Helpers ---- */
     public function employeeName(): string

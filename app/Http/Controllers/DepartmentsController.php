@@ -25,6 +25,9 @@ class DepartmentsController extends Controller
             'description' => 'nullable|string',
             'code' => 'required|string|max:10|unique:departments,code',
             'status' => 'required|in:enabled,disabled',
+            'signatory_name' => 'nullable|string|max:120',
+            'signatory_position' => 'nullable|string|max:120',
+            'signature_path' => 'nullable|string|max:300',
         ]);
 
         Departments::create($validatedData);
@@ -44,6 +47,9 @@ class DepartmentsController extends Controller
             'description' => 'nullable|string',
             'code' => 'required|string|max:10|unique:departments,code,' . $department->id,
             'status' => 'required|in:enabled,disabled',
+            'signatory_name' => 'nullable|string|max:120',
+            'signatory_position' => 'nullable|string|max:120',
+            'signature_path' => 'nullable|string|max:300',
         ]);
 
         $department->update($validatedData);

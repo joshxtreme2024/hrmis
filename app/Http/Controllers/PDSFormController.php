@@ -39,13 +39,13 @@ class PDSFormController extends Controller
         ])->findOrFail($userId);
 
         if ($page === 1) {
-            return view('pds.form1', compact('user'));
+            return view('pds.Page1', compact('user'));
         } elseif ($page === 2) {
-            return view('pds.form2', compact('user'));
+            return view('pds.Page2', compact('user'));
         } elseif ($page === 3) {
-            return view('pds.form3', compact('user'));
+            return view('pds.Page3', compact('user'));
         } else {
-            return view('pds.form4', compact('user'));
+            return view('pds.Page4', compact('user'));
         }
     }
     

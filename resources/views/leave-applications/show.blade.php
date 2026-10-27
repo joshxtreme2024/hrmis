@@ -8,7 +8,7 @@
     </li>
     <li class="flex items-center">
         <i class="bi bi-chevron-right text-gray-300 dark:text-gray-600 mx-2 text-xs"></i>
-        <span class="text-gray-800 dark:text-gray-200 font-medium">Leave Applications</span>
+        <span class="text-gray-800 dark:text-gray-200 font-medium"><a href="{{ route('leave-applications.index') }}" class="hover:text-indigo-600">Leave Applications</a></span>
     </li>
     <li class="flex items-center">
         <i class="bi bi-chevron-right text-gray-300 dark:text-gray-600 mx-2 text-xs"></i>
@@ -163,10 +163,10 @@
                     <dt class="text-gray-500">Days without pay</dt><dd>{{ $fmt($a->approved_days_without_pay) }}</dd>
                     <dt class="text-gray-500">Others</dt><dd>{{ $fmt($a->approved_days_others) }}{{ $a->approved_others_specify ? ' (' . $a->approved_others_specify . ')' : '' }}</dd>
                 </dl>
-                <p class="mt-3 text-xs text-gray-500">Approved by {{ $a->approver?->name ?? '—' }} on {{ $a->decided_at?->format('M d, Y') }}</p>
+                <p class="mt-3 text-xs text-gray-500">Approved by the {{ $a->approver?->getPositionTitleAttribute() ?? '—' }} on {{ $a->decided_at?->format('M d, Y') }}</p>
             @elseif ($a->status === 'disapproved')
                 <p class="text-sm">{{ $a->disapproval_reason }}</p>
-                <p class="mt-3 text-xs text-gray-500">Disapproved by {{ $a->approver?->name ?? '—' }} on {{ $a->decided_at?->format('M d, Y') }}</p>
+                <p class="mt-3 text-xs text-gray-500">Disapproved by {{ $a->approver?->first_name ?? '—' }} on {{ $a->decided_at?->format('M d, Y') }}</p>
             @else
                 <p class="text-sm text-gray-500">Awaiting decision.</p>
             @endif

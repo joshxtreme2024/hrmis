@@ -26,12 +26,18 @@ use App\Http\Controllers\Auth\AdminLoginController;
 use App\Http\Controllers\MyDocumentController;
 use App\Http\Controllers\DocumentManagementController;
 use App\Http\Controllers\EmployeeController;
+use App\Http\Controllers\EmploymentManagementController;
 use App\Http\Controllers\BackgroundInfoController;
 use App\Http\Controllers\PDSFormController;
 use App\Http\Controllers\LeaveTypeController;
 use App\Http\Controllers\LeaveApplicationController;
 use App\Http\Controllers\MyLeaveController;
 use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\LeaveLedgerController;
+use App\Http\Controllers\MyLeaveLedgerController;
+use App\Http\Controllers\LeaveCalendarController;
+use App\Http\Controllers\DepartmentLeaveCalendarController;
+use App\Http\Controllers\MyLeaveCalendarController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -285,9 +291,12 @@ Route::middleware('auth')->group(function () {
     ->name('employee.documents.stream');
 
     //my-leave management
-     Route::resource('my-leaves', MyLeaveController::class)
+    Route::resource('my-leaves', MyLeaveController::class)
         ->parameters(['my-leaves' => 'leave_application'])
         ->except(['destroy']);
+ 
+    Route::get('my-leaves/{leave_application}/print', [MyLeaveController::class, 'printForm'])
+        ->name('my-leaves.print');
  
     Route::post('my-leaves/{leave_application}/cancel', [MyLeaveController::class, 'cancel'])
         ->name('my-leaves.cancel');
@@ -405,6 +414,9 @@ Route::middleware(['auth', 'role:admin|hr'])->group(function () {
     Route::post('leave-applications/{leave_application}/recommend', [LeaveApplicationController::class, 'recommend'])->name('leave-applications.recommend');
     Route::post('leave-applications/{leave_application}/decide',    [LeaveApplicationController::class, 'decide'])->name('leave-applications.decide');
     Route::post('leave-applications/{leave_application}/cancel',    [LeaveApplicationController::class, 'cancel'])->name('leave-applications.cancel');
+
+    //leave ledger
+    Route::get('/leave-ledgers', [LeaveLedgerController::class, 'index'])->name('leave-ledger.index');
 });
 
 Route::middleware(['auth'])->group(function () {
@@ -414,6 +426,27 @@ Route::middleware(['auth'])->group(function () {
     Route::post('leave-applications/{leave_application}/recommend', [LeaveApplicationController::class, 'recommend'])->name('leave-applications.recommend');
     Route::post('leave-applications/{leave_application}/decide',    [LeaveApplicationController::class, 'decide'])->name('leave-applications.decide');
     Route::post('leave-applications/{leave_application}/cancel',    [LeaveApplicationController::class, 'staffCancel'])->name('leave-applications.cancel');
+
+    Route::get('/my-leave-ledger', [MyLeaveLedgerController::class, 'index'])->name('my-leave-ledger.index');
+
+    //leave calendar
+    Route::get('leave-calendar',            [LeaveCalendarController::class, 'index'])->name('leave-calendar.index');            // HR
+    Route::get('department-leave-calendar', [DepartmentLeaveCalendarController::class, 'index'])->name('department-leave-calendar.index'); // department heads
+    Route::get('my-leave-calendar',         [MyLeaveCalendarController::class, 'index'])->name('my-leave-calendar.index');       // employees
 });
+
+Route::middleware(['auth', 'role:admin|hr'])->prefix('leave-ledgers')->name('leave-ledgers.')->group(function () {
+    Route::get('/',                          [LeaveLedgerController::class, 'index'])->name('index');
+    Route::post('accrue',                    [LeaveLedgerController::class, 'accrue'])->name('accrue');
+    Route::post('entries/{entry}/reverse',   [LeaveLedgerController::class, 'reverse'])->name('reverse');
+    Route::get('{employee}',                 [LeaveLedgerController::class, 'show'])->name('show');
+    Route::post('{employee}/entries',        [LeaveLedgerController::class, 'store'])->name('store');
+});
+
+Route::middleware(['auth', 'role:admin|hr'])->group(function () {
+    Route::get ('employees/{employee}/employment/edit', [EmploymentManagementController::class, 'edit'])->name('management.employment.edit');
+    Route::patch('employees/{employee}/employment',      [EmploymentManagementController::class, 'update'])->name('management.employment.update');
+});
+
 
 require __DIR__.'/auth.php';

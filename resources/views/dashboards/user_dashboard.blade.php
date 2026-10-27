@@ -2,315 +2,271 @@
 @extends('layouts.app')
 
 @section('title', 'Dashboard')
+@section('header', 'Dashboard')
+@section('subheader', 'Welcome back, ' . ($personalInfo['name'] ?? 'Employee'))
+
+@php
+    $navFrom = '#0a2463';
+    $navTo   = '#06173f';
+
+    $btnGhost = 'inline-flex items-center gap-2 rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700';
+    $card     = 'rounded-xl border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800';
+    $cardHead = 'mb-5 flex items-center justify-between';
+    $dot      = fn ($c) => '<span class="inline-block h-2 w-2 rounded-full ' . $c . '"></span>';
+    $h3       = 'flex items-center gap-2 text-sm font-semibold text-gray-900 dark:text-white';
+    $sub      = 'mt-0.5 text-xs text-gray-500 dark:text-gray-400';
+
+    $statusVariant = function ($status) {
+        return match ($status) {
+            'Present', 'Active'  => ['text-emerald-600 dark:text-emerald-400', 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300', 'bg-emerald-500'],
+            'Absent'             => ['text-rose-600 dark:text-rose-400',       'bg-rose-50 text-rose-700 dark:bg-rose-900/30 dark:text-rose-300',             'bg-rose-500'],
+            'On Leave'           => ['text-amber-600 dark:text-amber-400',     'bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300',         'bg-amber-500'],
+            default              => ['text-gray-600 dark:text-gray-300',       'bg-gray-50 text-gray-700 dark:bg-gray-700/40 dark:text-gray-300',             'bg-gray-400'],
+        };
+    };
+
+    $todayStatus   = $attendanceSummary['today']['status'] ?? '—';
+    [$todayText, $todayChip, $todayDot] = $statusVariant($todayStatus);
+@endphp
+
+@section('header-actions')
+    <span class="inline-flex items-center gap-2 rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-gray-600 shadow-sm dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">
+        <i class="bi bi-calendar3 text-gray-400" aria-hidden="true"></i>
+        {{ now()->format('l, F d, Y') }}
+    </span>
+    <a href="{{ route('employee.profile.edit') }}" class="{{ $btnGhost }}">
+        <i class="bi bi-pencil-square"></i> Edit profile
+    </a>
+    <button type="button" onclick="window.location.reload()" class="{{ $btnGhost }}">
+        <i class="bi bi-arrow-clockwise"></i> Refresh
+    </button>
+@endsection
 
 @section('content')
-<div class="p-6 bg-gradient-to-br from-slate-50 to-slate-100/80 min-h-screen">
-    <!-- Page Header -->
-    <div class="mb-8">
-        <div class="flex items-center justify-between">
-            <div>
-                <h2 class="text-3xl font-bold text-slate-800 tracking-tight">Dashboard</h2>
-                <p class="text-sm text-slate-500 mt-1 flex items-center gap-2">
-                    <span>Welcome back,</span>
-                    <span class="font-medium text-slate-700">{{ $personalInfo['name'] ?? 'Employee' }}</span>
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block"></span>
-                    <span class="text-emerald-600 text-xs font-medium">Online</span>
-                </p>
-            </div>
-            <div class="flex items-center gap-3">
-                <div class="bg-white/80 backdrop-blur-sm px-4 py-2 rounded-xl shadow-sm border border-slate-200/60 flex items-center gap-2">
-                    <i class="bi bi-calendar3 text-slate-400"></i>
-                    <span class="text-sm font-medium text-slate-600">{{ now()->format('l, F d, Y') }}</span>
-                </div>
-                <button onclick="window.location.reload()" 
-                        class="bg-white hover:bg-slate-50 text-slate-600 px-4 py-2 rounded-xl shadow-sm border border-slate-200/60 transition-all duration-200 flex items-center gap-2 hover:shadow-md hover:border-slate-300">
-                    <i class="bi bi-arrow-clockwise"></i>
-                    <span class="text-sm font-medium">Refresh</span>
-                </button>
-            </div>
-        </div>
-    </div>
+<div class="space-y-6 p-6">
 
-    <!-- Employee Profile Card -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-6 mb-6 hover:shadow-lg transition-all duration-300">
-        <div class="flex items-center">
-            <div class="flex-shrink-0 relative">
-                @if($personalInfo['profile_picture'])
-                    <img src="{{ asset('storage/' . $personalInfo['profile_picture']) }}" 
-                         alt="{{ $personalInfo['name'] }}" 
-                         class="h-20 w-20 rounded-full object-cover border-4 border-white shadow-lg">
-                @else
-                    <div class="h-20 w-20 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 text-white flex items-center justify-center text-2xl font-bold shadow-lg">
-                        {{ $personalInfo['initials'] ?? '?' }}
-                    </div>
-                @endif
-                <div class="absolute bottom-0 right-0 w-4 h-4 bg-emerald-500 rounded-full border-2 border-white"></div>
-            </div>
-            <div class="ml-5 flex-1">
-                <h3 class="text-xl font-bold text-slate-800">{{ $personalInfo['name'] }}</h3>
-                <div class="flex flex-wrap items-center gap-3 mt-1">
-                    <span class="text-sm text-slate-600 flex items-center">
-                        <i class="bi bi-building mr-1.5 text-slate-400"></i>
-                        {{ $personalInfo['department'] }}
-                    </span>
-                    <span class="text-slate-300">|</span>
-                    <span class="text-sm text-slate-600 flex items-center">
-                        <i class="bi bi-briefcase mr-1.5 text-slate-400"></i>
-                        {{ $personalInfo['position'] }}
-                    </span>
-                    <span class="text-slate-300">|</span>
-                    <span class="text-sm text-slate-600 flex items-center">
-                        <i class="bi bi-person-badge mr-1.5 text-slate-400"></i>
-                        ID: {{ $personalInfo['employee_id'] }}
-                    </span>
+    {{-- ===== Hero strip: navy → deep-navy (matches nav) ===== --}}
+    <section class="overflow-hidden rounded-xl text-blue-100 shadow-sm"
+             style="background-image: linear-gradient(to bottom right, {{ $navFrom }}, {{ $navTo }});">
+        <div class="flex flex-col gap-4 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex items-center gap-4">
+                <div class="relative shrink-0">
+                    @if (!empty($personalInfo['profile_picture']))
+                        <img src="{{ asset('storage/' . $personalInfo['profile_picture']) }}"
+                             alt="{{ $personalInfo['name'] }}"
+                             class="h-16 w-16 rounded-full object-cover ring-4 ring-white/20">
+                    @else
+                        <span class="flex h-16 w-16 items-center justify-center rounded-full bg-white/10 text-xl font-semibold text-white ring-4 ring-white/20">
+                            {{ $personalInfo['initials'] ?? '?' }}
+                        </span>
+                    @endif
+                    <span class="absolute bottom-0 right-0 h-4 w-4 rounded-full border-2 border-[#0a2463] bg-emerald-400" aria-hidden="true"></span>
                 </div>
-                <div class="flex flex-wrap items-center gap-2 mt-2">
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-100/60">
-                        <i class="bi bi-calendar-check mr-1.5"></i>
-                        Hired: {{ $personalInfo['hire_date'] }}
-                    </span>
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-medium 
-                        @if($personalInfo['status'] == 'Active') bg-emerald-50 text-emerald-700 border border-emerald-100/60
-                        @elseif($personalInfo['status'] == 'On Leave') bg-amber-50 text-amber-700 border border-amber-100/60
-                        @else bg-slate-50 text-slate-700 border border-slate-200/60 @endif">
-                        <span class="w-1.5 h-1.5 rounded-full inline-block mr-1.5 
-                            @if($personalInfo['status'] == 'Active') bg-emerald-500
-                            @elseif($personalInfo['status'] == 'On Leave') bg-amber-500
-                            @else bg-slate-400 @endif"></span>
-                        Status: {{ $personalInfo['status'] }}
-                    </span>
-                </div>
-            </div>
-            <div class="flex gap-1.5">
-                <a href="{{ route('employee.profile.edit') }}" 
-                   class="p-2.5 text-blue-600 hover:bg-blue-50 rounded-xl transition-all duration-200 hover:shadow-sm group">
-                    <i class="bi bi-pencil group-hover:scale-110 transition-transform"></i>
-                </a>
-            </div>
-        </div>
-    </div>
-
-    <!-- Quick Stats -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <!-- Today's Status -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-5 hover:shadow-lg transition-all duration-300 group hover:border-emerald-200">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Today's Status</p>
-                    <p class="text-xl font-bold mt-1.5 
-                        @if($attendanceSummary['today']['status'] == 'Present') text-emerald-600
-                        @elseif($attendanceSummary['today']['status'] == 'Absent') text-rose-600
-                        @else text-slate-600 @endif">
-                        {{ $attendanceSummary['today']['status'] }}
-                    </p>
-                    <p class="text-xs text-slate-400">Check-in: {{ $attendanceSummary['today']['check_in'] }}</p>
-                </div>
-                <div class="w-11 h-11 rounded-xl flex items-center justify-center
-                    @if($attendanceSummary['today']['status'] == 'Present') bg-emerald-50 text-emerald-600
-                    @elseif($attendanceSummary['today']['status'] == 'Absent') bg-rose-50 text-rose-600
-                    @else bg-slate-50 text-slate-600 @endif 
-                    group-hover:scale-110 transition-transform duration-300">
-                    <i class="bi 
-                        @if($attendanceSummary['today']['status'] == 'Present') bi-check-circle-fill text-xl
-                        @elseif($attendanceSummary['today']['status'] == 'Absent') bi-x-circle-fill text-xl
-                        @else bi-clock text-xl @endif"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Attendance Rate -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-5 hover:shadow-lg transition-all duration-300 group hover:border-blue-200">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Attendance Rate</p>
-                    <p class="text-xl font-bold text-blue-600 mt-1.5">{{ $attendanceSummary['monthly']['attendance_rate'] ?? 0 }}%</p>
-                    <p class="text-xs text-slate-400">This month</p>
-                </div>
-                <div class="w-11 h-11 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-500/20 group-hover:scale-110 transition-transform duration-300">
-                    <i class="bi bi-percent text-xl"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Leave Balance -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-5 hover:shadow-lg transition-all duration-300 group hover:border-purple-200">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Leave Balance</p>
-                    <p class="text-xl font-bold text-purple-600 mt-1.5">{{ $leaveSummary['balance']['vacation'] ?? 0 }}</p>
-                    <p class="text-xs text-slate-400">Vacation days left</p>
-                </div>
-                <div class="w-11 h-11 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-purple-500/20 group-hover:scale-110 transition-transform duration-300">
-                    <i class="bi bi-calendar2-week text-xl"></i>
-                </div>
-            </div>
-        </div>
-
-        <!-- Pending Leaves -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-5 hover:shadow-lg transition-all duration-300 group hover:border-amber-200">
-            <div class="flex items-center justify-between">
-                <div>
-                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Pending Leaves</p>
-                    <p class="text-xl font-bold text-amber-500 mt-1.5">{{ $leaveSummary['pending'] ?? 0 }}</p>
-                    <p class="text-xs text-slate-400">Awaiting approval</p>
-                </div>
-                <div class="w-11 h-11 bg-gradient-to-br from-amber-500 to-amber-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-amber-500/20 group-hover:scale-110 transition-transform duration-300">
-                    <i class="bi bi-clock text-xl"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Leave Summary & Quick Actions -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-        <!-- Leave Summary -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-6 hover:shadow-lg transition-all duration-300 lg:col-span-2">
-            <div class="flex items-center justify-between mb-5">
-                <div>
-                    <h3 class="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
-                        My Leave Summary
-                    </h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Overview of your leaves</p>
-                </div>
-                <a href="{{ route('employee.leaves.history') }}" class="text-xs text-blue-600 hover:text-blue-800 font-medium hover:underline">View all</a>
-            </div>
-            
-            <!-- Leave Stats -->
-            <div class="grid grid-cols-3 gap-3 mb-5">
-                <div class="text-center p-3 bg-amber-50/80 rounded-xl border border-amber-100/50">
-                    <p class="text-xl font-bold text-amber-600">{{ $leaveSummary['pending'] ?? 0 }}</p>
-                    <p class="text-[10px] font-medium text-amber-500">Pending</p>
-                </div>
-                <div class="text-center p-3 bg-emerald-50/80 rounded-xl border border-emerald-100/50">
-                    <p class="text-xl font-bold text-emerald-600">{{ $leaveSummary['approved'] ?? 0 }}</p>
-                    <p class="text-[10px] font-medium text-emerald-500">Approved</p>
-                </div>
-                <div class="text-center p-3 bg-rose-50/80 rounded-xl border border-rose-100/50">
-                    <p class="text-xl font-bold text-rose-600">{{ $leaveSummary['rejected'] ?? 0 }}</p>
-                    <p class="text-[10px] font-medium text-rose-500">Rejected</p>
-                </div>
-            </div>
-
-            <!-- Leave Balance Details -->
-            <div>
-                <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Leave Balance</p>
-                <div class="grid grid-cols-3 gap-3">
-                    <div class="flex items-center justify-between p-2.5 bg-slate-50/80 rounded-xl border border-slate-200/50">
-                        <span class="text-sm text-slate-600">Vacation</span>
-                        <span class="text-sm font-bold text-slate-800">{{ $leaveSummary['balance']['vacation'] ?? 0 }} days</span>
-                    </div>
-                    <div class="flex items-center justify-between p-2.5 bg-slate-50/80 rounded-xl border border-slate-200/50">
-                        <span class="text-sm text-slate-600">Sick</span>
-                        <span class="text-sm font-bold text-slate-800">{{ $leaveSummary['balance']['sick'] ?? 0 }} days</span>
-                    </div>
-                    <div class="flex items-center justify-between p-2.5 bg-slate-50/80 rounded-xl border border-slate-200/50">
-                        <span class="text-sm text-slate-600">Emergency</span>
-                        <span class="text-sm font-bold text-slate-800">{{ $leaveSummary['balance']['emergency'] ?? 0 }} days</span>
+                <div class="min-w-0">
+                    <p class="text-xs font-medium uppercase tracking-wider text-blue-300/80">Welcome back</p>
+                    <h2 class="text-xl font-semibold text-white">{{ $personalInfo['name'] }}</h2>
+                    <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-blue-200">
+                        <span class="inline-flex items-center gap-1.5">
+                            <i class="bi bi-building" aria-hidden="true"></i>{{ $personalInfo['department'] }}
+                        </span>
+                        <span aria-hidden="true">·</span>
+                        <span class="inline-flex items-center gap-1.5">
+                            <i class="bi bi-briefcase" aria-hidden="true"></i>{{ $personalInfo['position'] }}
+                        </span>
+                        <span aria-hidden="true">·</span>
+                        <span class="inline-flex items-center gap-1.5">
+                            <i class="bi bi-person-badge" aria-hidden="true"></i>ID: {{ $personalInfo['employee_id'] }}
+                        </span>
                     </div>
                 </div>
             </div>
 
-            <!-- Upcoming Leaves -->
-            @if(count($leaveSummary['upcoming'] ?? []) > 0)
-                <div class="mt-4">
-                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-2.5">Upcoming Leaves</p>
-                    <div class="space-y-2">
-                        @foreach($leaveSummary['upcoming'] as $leave)
-                            <div class="flex items-center justify-between p-2.5 bg-slate-50/80 rounded-xl border border-slate-200/50">
-                                <div>
-                                    <p class="text-sm font-medium text-slate-700">{{ ucfirst($leave['type']) }} Leave</p>
-                                    <p class="text-xs text-slate-400">{{ $leave['date_from'] }} - {{ $leave['date_to'] }}</p>
-                                </div>
-                                <span class="text-xs bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full font-medium">Approved</span>
+            <div class="flex flex-wrap items-center gap-2 text-xs">
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-blue-100 ring-1 ring-white/15">
+                    <span class="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400"></span>
+                    Online
+                </span>
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-blue-100 ring-1 ring-white/15">
+                    <i class="bi bi-calendar-check" aria-hidden="true"></i>
+                    Hired: {{ $personalInfo['hire_date'] }}
+                </span>
+                <span class="inline-flex items-center gap-1.5 rounded-full bg-white/10 px-3 py-1 text-blue-100 ring-1 ring-white/15">
+                    <span class="inline-block h-1.5 w-1.5 rounded-full {{ $todayDot }}"></span>
+                    {{ $todayStatus }}
+                </span>
+            </div>
+        </div>
+    </section>
+
+    {{-- ===== Quick stats ===== --}}
+    @php
+        $stats = [
+            [
+                'label' => 'Today\'s status',
+                'value' => $todayStatus,
+                'hint'  => 'Check-in: ' . ($attendanceSummary['today']['check_in'] ?? '—'),
+                'icon'  => $todayStatus === 'Present' ? 'bi-check-circle-fill' : ($todayStatus === 'Absent' ? 'bi-x-circle-fill' : 'bi-clock'),
+                'valueColor' => $todayText,
+                'chip'  => $todayChip,
+            ],
+            [
+                'label' => 'Attendance rate',
+                'value' => ($attendanceSummary['monthly']['attendance_rate'] ?? 0) . '%',
+                'hint'  => 'This month',
+                'icon'  => 'bi-percent',
+                'valueColor' => 'text-blue-600 dark:text-blue-400',
+                'chip'  => 'bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:text-blue-300',
+            ],
+            [
+                'label' => 'Leave balance',
+                'value' => $leaveSummary['balance']['vacation'] ?? 0,
+                'hint'  => 'Vacation days left',
+                'icon'  => 'bi-calendar2-week',
+                'valueColor' => 'text-sky-600 dark:text-sky-400',
+                'chip'  => 'bg-sky-50 text-sky-600 dark:bg-sky-900/30 dark:text-sky-300',
+            ],
+            [
+                'label' => 'Pending leaves',
+                'value' => $leaveSummary['pending'] ?? 0,
+                'hint'  => 'Awaiting approval',
+                'icon'  => 'bi-clock',
+                'valueColor' => 'text-amber-600 dark:text-amber-400',
+                'chip'  => 'bg-amber-50 text-amber-600 dark:bg-amber-900/30 dark:text-amber-300',
+            ],
+        ];
+    @endphp
+    <section class="grid grid-cols-2 gap-4 lg:grid-cols-4" aria-label="Quick stats">
+        @foreach ($stats as $s)
+            <div class="{{ $card }} p-5">
+                <div class="flex items-start justify-between gap-2">
+                    <p class="text-xs font-medium uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ $s['label'] }}</p>
+                    <span class="flex h-9 w-9 items-center justify-center rounded-lg {{ $s['chip'] }}">
+                        <i class="bi {{ $s['icon'] }}" aria-hidden="true"></i>
+                    </span>
+                </div>
+                <p class="mt-2 text-2xl font-semibold tabular-nums {{ $s['valueColor'] }}">{{ $s['value'] }}</p>
+                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ $s['hint'] }}</p>
+            </div>
+        @endforeach
+    </section>
+
+    {{-- ===== Leave summary + quick actions ===== --}}
+    <section class="grid grid-cols-1 gap-6 lg:grid-cols-3">
+
+        {{-- My leave summary --}}
+        <div class="{{ $card }} p-6 lg:col-span-2">
+            <div class="{{ $cardHead }}">
+                <div>
+                    <h3 class="{{ $h3 }}">{!! $dot('bg-amber-500') !!} My leave summary</h3>
+                    <p class="{{ $sub }}">Overview of your leaves</p>
+                </div>
+                <a href="{{ route('employee.leaves.history') }}" class="text-xs font-medium text-sky-700 hover:underline dark:text-sky-300">View all</a>
+            </div>
+
+            <div class="mb-5 grid grid-cols-3 gap-2">
+                @foreach ([
+                    ['Pending',  number_format($leaveSummary['pending'] ?? 0),  'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300'],
+                    ['Approved', number_format($leaveSummary['approved'] ?? 0), 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300'],
+                    ['Rejected', number_format($leaveSummary['rejected'] ?? 0), 'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300'],
+                ] as [$label, $val, $cls])
+                    <div class="rounded-lg p-2.5 text-center {{ $cls }}">
+                        <p class="text-lg font-semibold tabular-nums">{{ $val }}</p>
+                        <p class="text-[10px] font-medium">{{ $label }}</p>
+                    </div>
+                @endforeach
+            </div>
+
+            <p class="mb-2 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Leave balance</p>
+            <div class="grid grid-cols-1 gap-2 sm:grid-cols-3">
+                @foreach ([
+                    ['Vacation',              $leaveSummary['balance']['vacation'] ?? 0,     'bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-300'],
+                    ['Sick',                  $leaveSummary['balance']['sick'] ?? 0,         'bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300'],
+                    ['Mandatory Forced Leave', $leaveSummary['balance']['forced_leave'] ?? 0, 'bg-amber-50 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300'],
+                ] as [$label, $val, $cls])
+                    <div class="flex items-center justify-between rounded-lg border border-gray-200 p-2.5 dark:border-gray-700">
+                        <span class="text-sm text-gray-600 dark:text-gray-400">{{ $label }}</span>
+                        <span class="text-sm font-semibold tabular-nums text-gray-900 dark:text-white">{{ $val }} <span class="text-xs font-normal text-gray-500 dark:text-gray-400">days</span></span>
+                    </div>
+                @endforeach
+            </div>
+
+            @if (count($leaveSummary['upcoming'] ?? []) > 0)
+                <p class="mb-2 mt-4 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-gray-400">Upcoming leaves</p>
+                <div class="space-y-2">
+                    @foreach ($leaveSummary['upcoming'] as $leave)
+                        <div class="flex items-center justify-between rounded-lg border border-gray-200 p-2.5 dark:border-gray-700">
+                            <div>
+                                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ ucfirst($leave['type']) }} leave</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ $leave['date_from'] }} – {{ $leave['date_to'] }}</p>
                             </div>
-                        @endforeach
-                    </div>
+                            <span class="inline-flex rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-medium text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300">Approved</span>
+                        </div>
+                    @endforeach
                 </div>
             @endif
         </div>
 
-        <!-- Quick Actions -->
-        <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-6 hover:shadow-lg transition-all duration-300">
-            <div class="flex items-center justify-between mb-5">
+        {{-- Quick actions --}}
+        <div class="{{ $card }} p-6">
+            <div class="{{ $cardHead }}">
                 <div>
-                    <h3 class="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-slate-400 inline-block"></span>
-                        Quick Actions
-                    </h3>
-                    <p class="text-xs text-slate-400 mt-0.5">Common tasks</p>
+                    <h3 class="{{ $h3 }}">{!! $dot('bg-gray-400') !!} Quick actions</h3>
+                    <p class="{{ $sub }}">Common tasks</p>
                 </div>
             </div>
             <div class="grid grid-cols-2 gap-3">
-                @foreach($quickActions ?? [] as $action)
-                    <a href="{{ $action['route'] }}" 
-                       class="flex flex-col items-center justify-center p-4 bg-slate-50/80 hover:bg-{{ $action['color'] }}-50/80 rounded-xl border border-slate-200/60 hover:border-{{ $action['color'] }}-300 transition-all duration-200 group">
-                        <div class="w-11 h-11 rounded-xl bg-{{ $action['color'] }}-100 text-{{ $action['color'] }}-600 flex items-center justify-center mb-2 group-hover:bg-{{ $action['color'] }}-600 group-hover:text-white transition-all duration-200 shadow-sm group-hover:shadow-lg">
-                            <i class="bi {{ $action['icon'] }} text-lg"></i>
-                        </div>
-                        <span class="text-xs font-medium text-slate-600 group-hover:text-{{ $action['color'] }}-700 text-center">{{ $action['label'] }}</span>
+                @foreach ($quickActions ?? [] as $action)
+                    <a href="{{ $action['route'] }}"
+                       class="group flex flex-col items-center justify-center rounded-lg border border-gray-200 bg-gray-50/80 p-4 transition-colors hover:bg-white dark:border-gray-700 dark:bg-gray-700/30 dark:hover:bg-gray-700/60">
+                        <span class="mb-2 flex h-11 w-11 items-center justify-center rounded-lg bg-white text-sky-600 shadow-sm transition-colors group-hover:bg-sky-600 group-hover:text-white dark:bg-gray-800 dark:text-sky-300 dark:group-hover:bg-sky-500">
+                            <i class="bi {{ $action['icon'] }} text-lg" aria-hidden="true"></i>
+                        </span>
+                        <span class="text-center text-xs font-medium text-gray-700 dark:text-gray-200">{{ $action['label'] }}</span>
                     </a>
                 @endforeach
             </div>
         </div>
-    </div>
+    </section>
 
-    <!-- Upcoming Events -->
-    <div class="bg-white rounded-2xl shadow-sm border border-slate-200/60 p-6 hover:shadow-lg transition-all duration-300">
-        <div class="flex items-center justify-between mb-5">
+    {{-- ===== Upcoming events ===== --}}
+    <section class="{{ $card }} p-6">
+        <div class="{{ $cardHead }}">
             <div>
-                <h3 class="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-purple-500 inline-block"></span>
-                    Upcoming Events
-                </h3>
-                <p class="text-xs text-slate-400 mt-0.5">Your birthdays and anniversaries</p>
+                <h3 class="{{ $h3 }}">{!! $dot('bg-purple-500') !!} Upcoming events</h3>
+                <p class="{{ $sub }}">Your birthdays and anniversaries</p>
             </div>
-            <span class="text-xs bg-purple-50 text-purple-600 px-3 py-1.5 rounded-full font-medium">Next 30 days</span>
+            <span class="rounded-full bg-purple-50 px-3 py-1 text-xs font-medium text-purple-700 dark:bg-purple-900/30 dark:text-purple-300">Next 30 days</span>
         </div>
-        <div class="space-y-2.5 max-h-64 overflow-y-auto pr-1 custom-scrollbar">
-            @forelse($upcomingEvents ?? [] as $event)
-                <div class="flex items-center gap-3 p-2.5 hover:bg-slate-50 rounded-xl transition-colors border border-slate-100/80">
-                    <div class="flex-shrink-0 text-2xl">{{ $event['icon'] }}</div>
-                    <div class="flex-1 min-w-0">
-                        <p class="text-sm font-medium text-slate-700">{{ $event['title'] }}</p>
-                        <p class="text-xs text-slate-400">{{ $event['details'] }}</p>
+        <div class="custom-scrollbar max-h-64 space-y-2.5 overflow-y-auto pr-1">
+            @forelse ($upcomingEvents ?? [] as $event)
+                <div class="flex items-center gap-3 rounded-lg border border-gray-100 p-2.5 hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-700/40">
+                    <div class="shrink-0 text-2xl">{{ $event['icon'] }}</div>
+                    <div class="min-w-0 flex-1">
+                        <p class="text-sm font-medium text-gray-900 dark:text-white">{{ $event['title'] }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $event['details'] }}</p>
                     </div>
-                    <div class="flex-shrink-0">
-                        <span class="text-xs font-semibold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">{{ $event['date'] }}</span>
-                    </div>
+                    <span class="shrink-0 rounded-full bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-700 dark:bg-sky-900/30 dark:text-sky-300">{{ $event['date'] }}</span>
                 </div>
             @empty
-                <div class="text-center py-8">
-                    <div class="w-14 h-14 rounded-full bg-slate-50 flex items-center justify-center mx-auto mb-3">
-                        <i class="bi bi-calendar text-2xl text-slate-300"></i>
-                    </div>
-                    <p class="text-sm font-medium text-slate-600">No upcoming events</p>
-                    <p class="text-xs text-slate-400">You don't have any events in the next 30 days</p>
+                <div class="py-8 text-center">
+                    <span class="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full bg-gray-50 dark:bg-gray-700/40">
+                        <i class="bi bi-calendar text-2xl text-gray-300 dark:text-gray-600" aria-hidden="true"></i>
+                    </span>
+                    <p class="text-sm font-medium text-gray-700 dark:text-gray-200">No upcoming events</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">You don't have any events in the next 30 days</p>
                 </div>
             @endforelse
         </div>
-    </div>
+    </section>
 </div>
 @endsection
 
 @push('styles')
 <style>
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 4px;
-    }
-    
-    .custom-scrollbar::-webkit-scrollbar-track {
-        background: #f1f5f9;
-        border-radius: 10px;
-    }
-    
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background: #cbd5e1;
-        border-radius: 10px;
-    }
-    
-    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-        background: #94a3b8;
-    }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+    .dark .custom-scrollbar::-webkit-scrollbar-thumb { background: #475569; }
 </style>
 @endpush

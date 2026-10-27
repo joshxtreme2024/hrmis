@@ -99,6 +99,10 @@
                                         @if($department->description)
                                         <div class="text-xs text-gray-500 mt-1 line-clamp-1">{{ \Illuminate\Support\Str::limit($department->description, 80) }}</div>
                                         @endif
+                                        @if($department->signatory_name)
+                                            <div class="text-xs font-semibold text-gray-500 mt-1 line-clamp-1">Headed by: {{ $department->signatory_name }}</div>
+                                            <div class="text-xs font-semibold text-gray-500 mt-1 line-clamp-1">Position: {{ $department->signatory_position }}</div>
+                                        @endif
                                     </div>
                                 </div>
                             </td>

@@ -4,7 +4,7 @@
 @section('breadcrumbs')
     <li class="flex items-center">
         <i class="bi bi-chevron-right text-gray-300 dark:text-gray-600 mx-2 text-xs"></i>
-        <span class="text-gray-800 dark:text-gray-200 font-medium">My Leaves</span>
+        <span class="text-gray-800 dark:text-gray-200 font-medium"><a href="{{ route('my-leaves.index') }}" class="hover:text-indigo-600">My Leaves</a></span>
     </li>
     <li class="flex items-center">
         <i class="bi bi-chevron-right text-gray-300 dark:text-gray-600 mx-2 text-xs"></i>
@@ -35,6 +35,9 @@
         <x-slot:actions>
             <span class="rounded-full px-3 py-1 text-sm font-medium {{ $a->statusBadge() }}">{{ $a->statusLabel() }}</span>
             <x-leave.banner-action :href="route('my-leaves.index')" icon="bi-arrow-left">Back</x-leave.banner-action>
+            @if ($a->status === 'approved')
+                <x-leave.banner-action :href="route('my-leaves.print', [$a, 'print' => 1])" target="_blank" rel="noopener" icon="bi-printer">Print leave form</x-leave.banner-action>
+            @endif
             @if ($a->isEditable())
                 <x-leave.banner-action :href="route('my-leaves.edit', $a)" icon="bi-pencil-square">Edit</x-leave.banner-action>
             @endif
@@ -83,6 +86,11 @@
                     @if ($a->approved_days_without_pay) · {{ $fmt($a->approved_days_without_pay) }} day(s) without pay @endif
                     @if ($a->approved_days_others) · {{ $fmt($a->approved_days_others) }} other{{ $a->approved_others_specify ? ' (' . $a->approved_others_specify . ')' : '' }} @endif
                 </p>
+                <div class="mt-4 flex items-start gap-3 rounded-lg bg-indigo-50 px-4 py-3 text-sm text-indigo-900 dark:bg-gray-700/50 dark:text-indigo-200">
+                    <i class="bi bi-printer mt-0.5"></i>
+                    <p>Print your approved leave form, sign it, and submit it to HR.
+                        <a href="{{ route('my-leaves.print', [$a, 'print' => 1]) }}" target="_blank" rel="noopener" class="font-medium underline">Print leave form</a></p>
+                </div>
             </section>
         @elseif ($a->status === 'disapproved')
             <section class="{{ $card }} border-red-300">

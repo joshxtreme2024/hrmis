@@ -21,6 +21,7 @@ class PDSEmployment extends Model
         'date_of_last_promotion',
         'salary',
         'step_increment',
+        'contract_end',
     ];
 
     protected $casts = [
@@ -29,6 +30,7 @@ class PDSEmployment extends Model
         'date_of_last_promotion' => 'date',
         'salary' => 'decimal:2',
         'step_increment' => 'integer',
+        'contract_end' => 'date',
     ];
 
     // Relationships
